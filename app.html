@@ -3,263 +3,406 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dwarf Mini Apartment Stargazer</title>
+  <title>Dwarf Mini Stargazer</title>
   <style>
-    :root {
-      --bg: #0b0e14;
-      --card: #151922;
-      --accent: #00d2ff;
-      --text: #e0e6ed;
-      --dim: #8892b0;
-    }
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      margin: 0;
       font-family: system-ui, -apple-system, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      display: grid;
-      grid-template-columns: 320px 1fr 320px;
+      background: #0b0e14;
+      color: #e0e6ed;
+      display: flex;
       height: 100vh;
+      width: 100vw;
       overflow: hidden;
     }
     .panel {
-      background: var(--card);
-      padding: 1rem;
+      width: 300px;
+      min-width: 300px;
+      background: #151922;
+      padding: 15px;
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 10px;
       overflow-y: auto;
       border-right: 1px solid #232936;
     }
     .panel-right { border-right: none; border-left: 1px solid #232936; }
-    h2 { font-size: 1.1rem; margin: 0.5rem 0 0.25rem 0; color: var(--accent); }
-    label { font-size: 0.85rem; color: var(--dim); display: block; margin-top: 0.25rem; }
-    input {
+    .viewport {
+      flex: 1;
+      background: #05070a;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    svg {
       width: 100%;
-      padding: 0.5rem;
+      height: 100%;
+      background: #05070a;
+    }
+    h2 { font-size: 0.95rem; color: #00d2ff; margin-top: 5px; }
+    label { font-size: 0.8rem; color: #8892b0; display: block; margin-top: 4px; }
+    input[type="number"] {
+      width: 100%;
+      padding: 6px 8px;
       background: #0b0e14;
       border: 1px solid #232936;
-      color: #fff;
+      color: #00d2ff;
+      font-weight: bold;
       border-radius: 4px;
+      margin-top: 2px;
     }
     button {
-      background: var(--accent);
+      background: #00d2ff;
       color: #000;
       font-weight: bold;
       border: none;
-      padding: 0.6rem;
+      padding: 8px;
       border-radius: 4px;
       cursor: pointer;
-      margin-top: 0.5rem;
+      margin-top: 2px;
     }
-    .canvas-container { position: relative; width: 100%; height: 100%; overflow: hidden; }
-    canvas { width: 100%; height: 100%; background: #05070a; display: block; }
-    .dso-card {
+    button:hover { background: #33d9ff; }
+    
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
       background: #0b0e14;
-      padding: 0.75rem;
+      padding: 8px;
       border-radius: 4px;
-      border-left: 3px solid var(--accent);
-      font-size: 0.85rem;
-      margin-bottom: 0.5rem;
+      border: 1px solid #232936;
     }
-    .dso-card h3 { margin: 0 0 0.25rem 0; font-size: 0.95rem; }
+    .filter-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: #e0e6ed;
+      cursor: pointer;
+    }
+    .filter-item input {
+      accent-color: #00d2ff;
+      cursor: pointer;
+    }
+
+    .card {
+      background: #0b0e14;
+      padding: 10px;
+      border-radius: 4px;
+      border-left: 3px solid #00d2ff;
+      font-size: 0.8rem;
+      margin-bottom: 8px;
+    }
+    .card.solar-sys {
+      border-left-color: #ffb703;
+    }
+    .badge {
+      display: inline-block;
+      margin-top: 5px;
+      padding: 2px 6px;
+      background: rgba(0,210,255,0.2);
+      color: #00d2ff;
+      border-radius: 3px;
+      font-weight: bold;
+    }
+    .badge.solar {
+      background: rgba(255,183,3,0.2);
+      color: #ffb703;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Controls Panel -->
+  <!-- CONTROL PANEL -->
   <div class="panel">
     <h2>Observer Location</h2>
-    <button id="btnGPS">Detect GPS Location</button>
+    <button id="btnGps">Detect GPS Location</button>
     
-    <label>Latitude (°)</label>
+    <label for="lat">Latitude (°)</label>
     <input type="number" id="lat" value="38.1157" step="0.0001">
     
-    <label>Longitude (°)</label>
+    <label for="lng">Longitude (°)</label>
     <input type="number" id="lng" value="13.3613" step="0.0001">
-    
-    <label>Elevation (m)</label>
-    <input type="number" id="elevation" value="35">
 
-    <h2>Window View Settings</h2>
-    <label>Facing Azimuth (° Center)</label>
-    <input type="number" id="azimuth" value="180" min="0" max="360">
+    <h2>Window Settings</h2>
+    <label for="azimuth">Facing Azimuth (° Center)</label>
+    <input type="number" id="azimuth" value="300" min="0" max="360">
     
-    <label>Field of View Window (° Horizontal)</label>
+    <label for="fov">Field of View FOV (° Wide)</label>
     <input type="number" id="fov" value="90" min="20" max="180">
 
-    <label>Min Horizon / Railing Altitude (°)</label>
-    <input type="number" id="minAlt" value="20" min="0" max="90">
+    <label for="minAlt">Min Horizon Height (°)</label>
+    <input type="number" id="minAlt" value="20" min="0" max="80">
 
-    <h2>Filter Settings</h2>
-    <label>Max DSOs to Display</label>
-    <input type="number" id="maxDso" value="6" min="1" max="20">
+    <h2>Filter Object Types</h2>
+    <div class="filter-group">
+      <label class="filter-item">
+        <input type="checkbox" id="chkSolar" checked> Solar System
+      </label>
+      <label class="filter-item">
+        <input type="checkbox" id="chkGalaxy" checked> Galaxies
+      </label>
+      <label class="filter-item">
+        <input type="checkbox" id="chkNebula" checked> Nebulae
+      </label>
+      <label class="filter-item">
+        <input type="checkbox" id="chkCluster" checked> Clusters
+      </label>
+      <label class="filter-item">
+        <input type="checkbox" id="chkStar" checked> Reference Stars
+      </label>
+    </div>
   </div>
 
-  <!-- Sky Canvas Preview -->
-  <div class="canvas-container">
-    <canvas id="skyCanvas"></canvas>
+  <!-- SVG SKY RENDER -->
+  <div class="viewport">
+    <svg id="sky" viewBox="0 0 800 500" preserveAspectRatio="none">
+      <line x1="0" y1="125" x2="800" y2="125" stroke="#1f293d" stroke-dasharray="4"/>
+      <line x1="0" y1="250" x2="800" y2="250" stroke="#1f293d" stroke-dasharray="4"/>
+      <line x1="400" y1="0" x2="400" y2="500" stroke="#1f293d" stroke-dasharray="4"/>
+      
+      <rect id="horizon" x="0" y="388" width="800" height="112" fill="#1c1313"/>
+      <line id="horizonLine" x1="0" y1="388" x2="800" y2="388" stroke="#ff4444" stroke-width="2"/>
+      
+      <g id="targetsGroup"></g>
+    </svg>
   </div>
 
-  <!-- Recommendations Panel -->
+  <!-- VISIBLE TARGETS LIST -->
   <div class="panel panel-right">
-    <h2>Dwarf Mini DSO Targets</h2>
-    <p style="font-size: 0.8rem; color: var(--dim);">Targets inside your window frame optimized for Dwarf Mini (~2.4°x1.2° FOV).</p>
-    <div id="dsoList"></div>
+    <h2>Visible DSO & Planets</h2>
+    <div id="targetList"></div>
   </div>
 
 <script>
-const CATALOG = [
-  { name: "M31 Andromeda Galaxy", ra: 10.68, dec: 41.27, mag: 3.4, type: "Galaxy" },
-  { name: "M42 Orion Nebula", ra: 83.82, dec: -5.39, mag: 4.0, type: "Nebula" },
-  { name: "M45 Pleiades Cluster", ra: 56.87, dec: 24.11, mag: 1.6, type: "Cluster" },
-  { name: "M51 Whirlpool Galaxy", ra: 202.47, dec: 47.19, mag: 8.4, type: "Galaxy" },
-  { name: "M8 Lagoon Nebula", ra: 270.92, dec: -24.38, mag: 6.0, type: "Nebula" },
-  { name: "M13 Hercules Cluster", ra: 250.42, dec: 36.46, mag: 5.8, type: "Cluster" },
-  { name: "M27 Dumbbell Nebula", ra: 299.90, dec: 22.72, mag: 7.5, type: "Nebula" },
-  { name: "M57 Ring Nebula", ra: 283.40, dec: 33.03, mag: 8.8, type: "Nebula" },
-  { name: "M20 Trifid Nebula", ra: 270.63, dec: -23.03, mag: 6.3, type: "Nebula" },
-  { name: "M16 Eagle Nebula", ra: 274.70, dec: -13.81, mag: 6.0, type: "Nebula" },
-  { name: "M17 Swan Nebula", ra: 275.20, dec: -16.18, mag: 6.0, type: "Nebula" },
-  { name: "M33 Triangulum Galaxy", ra: 23.46, dec: 30.66, mag: 5.7, type: "Galaxy" },
-  { name: "Vega", ra: 279.23, dec: 38.78, mag: 0.0, type: "Star" },
-  { name: "Betelgeuse", ra: 88.79, dec: 7.41, mag: 0.5, type: "Star" },
-  { name: "Sirius", ra: 101.28, dec: -16.72, mag: -1.46, type: "Star" },
-  { name: "Polaris", ra: 37.95, dec: 89.26, mag: 1.97, type: "Star" }
+// Fixed DSO & Star Catalog
+const CATALOG_DSO = [
+  { name: "M31 Andromeda Galaxy", ra: 10.68, dec: 41.27, mag: 3.4, category: "Galaxy", typeName: "Galaxy" },
+  { name: "M33 Triangulum Galaxy", ra: 23.46, dec: 30.66, mag: 5.7, category: "Galaxy", typeName: "Galaxy" },
+  { name: "M51 Whirlpool Galaxy", ra: 202.47, dec: 47.19, mag: 8.4, category: "Galaxy", typeName: "Galaxy" },
+  { name: "M81 Bode's Galaxy", ra: 148.89, dec: 69.07, mag: 6.9, category: "Galaxy", typeName: "Galaxy" },
+  { name: "M101 Pinwheel Galaxy", ra: 210.80, dec: 54.35, mag: 7.9, category: "Galaxy", typeName: "Galaxy" },
+  { name: "M42 Orion Nebula", ra: 83.82, dec: -5.39, mag: 4.0, category: "Nebula", typeName: "Emission Nebula" },
+  { name: "M27 Dumbbell Nebula", ra: 299.90, dec: 22.72, mag: 7.5, category: "Nebula", typeName: "Planetary Nebula" },
+  { name: "M57 Ring Nebula", ra: 283.40, dec: 33.03, mag: 8.8, category: "Nebula", typeName: "Planetary Nebula" },
+  { name: "M45 Pleiades Cluster", ra: 56.87, dec: 24.11, mag: 1.6, category: "Cluster", typeName: "Open Cluster" },
+  { name: "M13 Hercules Cluster", ra: 250.42, dec: 36.46, mag: 5.8, category: "Cluster", typeName: "Globular Cluster" },
+  { name: "Deneb (Reference Star)", ra: 310.36, dec: 45.28, mag: 1.25, category: "Star", typeName: "Star" },
+  { name: "Vega (Reference Star)", ra: 279.23, dec: 38.78, mag: 0.0, category: "Star", typeName: "Star" },
+  { name: "Polaris (North Star)", ra: 37.95, dec: 89.26, mag: 1.97, category: "Star", typeName: "Star" }
 ];
 
-function getAzDifference(targetAz, centerAz) {
+const RAD = Math.PI / 180;
+const DEG = 180 / Math.PI;
+
+function norm(deg) { return (deg % 360 + 360) % 360; }
+
+// Dynamic Solar System Ephemeris Calculator
+function getSolarSystemObjects(now) {
+  const d = (now - new Date(Date.UTC(2000, 0, 1, 12, 0, 0))) / 86400000;
+  
+  // Sun Position
+  const L = norm(280.466 + 0.9856474 * d);
+  const g = norm(357.528 + 0.9856003 * d) * RAD;
+  const sunEclLng = norm(L + 1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g));
+  const eps = 23.439 * RAD;
+  
+  const sunRa = norm(Math.atan2(Math.cos(eps) * Math.sin(sunEclLng * RAD), Math.cos(sunEclLng * RAD)) * DEG);
+  const sunDec = Math.asin(Math.sin(eps) * Math.sin(sunEclLng * RAD)) * DEG;
+  
+  // Moon Position & Phase Calculation
+  const Lm = norm(218.316 + 13.176396 * d);
+  const Mm = norm(134.963 + 13.064993 * d) * RAD;
+  const F = norm(93.272 + 13.229350 * d) * RAD;
+  
+  const moonEclLng = norm(Lm + 6.289 * Math.sin(Mm));
+  const moonEclLat = 5.128 * Math.sin(F);
+  
+  const moonRa = norm(Math.atan2(Math.sin(moonEclLng * RAD) * Math.cos(eps) - Math.tan(moonEclLat * RAD) * Math.sin(eps), Math.cos(moonEclLng * RAD)) * DEG);
+  const moonDec = Math.asin(Math.sin(moonEclLat * RAD) * Math.cos(eps) + Math.cos(moonEclLat * RAD) * Math.sin(eps) * Math.sin(moonEclLng * RAD)) * DEG;
+  
+  const phaseAngle = norm(moonEclLng - sunEclLng);
+  const illuminated = Math.round((1 - Math.cos(phaseAngle * RAD)) / 2 * 100);
+
+  // Approximate Planetary Keplerian Elements
+  const planets = [
+    { name: "Mercury", N: 48.33, i: 7.00, w: 29.12, a: 0.387, e: 0.2056, M0: 174.79, n: 4.0923, mag: -0.2 },
+    { name: "Venus", N: 76.68, i: 3.39, w: 54.88, a: 0.723, e: 0.0067, M0: 50.11, n: 1.6021, mag: -4.2 },
+    { name: "Mars", N: 49.56, i: 1.85, w: 286.50, a: 1.524, e: 0.0934, M0: 19.37, n: 0.5240, mag: 0.5 },
+    { name: "Jupiter", N: 100.46, i: 1.30, w: 273.87, a: 5.204, e: 0.0485, M0: 20.02, n: 0.0831, mag: -2.3 },
+    { name: "Saturn", N: 113.67, i: 2.49, w: 339.39, a: 9.582, e: 0.0555, M0: 317.02, n: 0.0335, mag: 0.6 }
+  ];
+
+  const earthEclLng = norm(sunEclLng + 180);
+  const R = 1.000; // Earth distance approx
+
+  const solSysList = [
+    { name: "Sun", ra: sunRa, dec: sunDec, mag: -26.7, category: "SolarSystem", typeName: "Star / Solar", color: "#ffcc00" },
+    { name: `Moon (${illuminated}% Illum)`, ra: moonRa, dec: moonDec, mag: -12.6, category: "SolarSystem", typeName: "Moon", color: "#e6e6e6" }
+  ];
+
+  planets.forEach(p => {
+    const M = norm(p.M0 + p.n * d) * RAD;
+    const E = M + p.e * Math.sin(M);
+    const xv = p.a * (Math.cos(E) - p.e);
+    const yv = p.a * Math.sqrt(1 - p.e * p.e) * Math.sin(E);
+    const v = Math.atan2(yv, xv);
+    const r = Math.sqrt(xv * xv + yv * yv);
+    
+    const l = norm((v * DEG) + p.w);
+    const xh = r * Math.cos(l * RAD);
+    const yh = r * Math.sin(l * RAD);
+    
+    const xg = xh + R * Math.cos(earthEclLng * RAD);
+    const yg = yh + R * Math.sin(earthEclLng * RAD);
+    
+    const geoLng = norm(Math.atan2(yg, xg) * DEG);
+    const ra = norm(Math.atan2(Math.sin(geoLng * RAD) * Math.cos(eps), Math.cos(geoLng * RAD)) * DEG);
+    const dec = Math.asin(Math.sin(geoLng * RAD) * Math.sin(eps)) * DEG;
+
+    solSysList.push({
+      name: p.name,
+      ra: ra,
+      dec: dec,
+      mag: p.mag,
+      category: "SolarSystem",
+      typeName: "Planet",
+      color: "#ffb703"
+    });
+  });
+
+  return solSysList;
+}
+
+function calcExposure(category, mag) {
+  if (category === "SolarSystem") return "Instant / Solar Filter";
+  let base = 5;
+  if (category === "Cluster") base = 3;
+  else if (category === "Galaxy") base = 15;
+  else if (category === "Nebula") base = 10;
+
+  const mins = Math.min(60, Math.max(2, Math.round(base * Math.pow(1.35, Math.max(0, mag - 4)))));
+  return mins < 60 ? `${mins} mins` : "1 hr+";
+}
+
+function getAzDiff(targetAz, centerAz) {
   let diff = (targetAz - centerAz) % 360;
   if (diff < -180) diff += 360;
   if (diff > 180) diff -= 360;
   return diff;
 }
 
-function raDecToAltAz(raDeg, decDeg, latDeg, lngDeg, date = new Date()) {
-  const rad = Math.PI / 180;
-  const lat = latDeg * rad;
-  const dec = decDeg * rad;
+function raDecToAltAz(raDeg, decDeg, latDeg, lngDeg, now) {
+  const lat = latDeg * RAD;
+  const dec = decDeg * RAD;
   
-  const d = (date - new Date(Date.UTC(2000, 0, 1, 12, 0, 0))) / 86400000;
+  const d = (now - new Date(Date.UTC(2000, 0, 1, 12, 0, 0))) / 86400000;
   const gst = (280.4606183 + 360.98564736629 * d) % 360;
   const lst = (gst + lngDeg + 360) % 360;
   
-  const ha = (lst - raDeg + 360) % 360 * rad;
-  
+  const ha = (lst - raDeg + 360) % 360 * RAD;
   const alt = Math.asin(Math.sin(lat) * Math.sin(dec) + Math.cos(lat) * Math.cos(dec) * Math.cos(ha));
   const az = Math.atan2(-Math.cos(dec) * Math.sin(ha), Math.sin(dec) * Math.cos(lat) - Math.cos(dec) * Math.sin(lat) * Math.cos(ha));
   
-  return {
-    alt: alt / rad,
-    az: (az / rad + 360) % 360
-  };
+  return { alt: alt / RAD, az: (az / RAD + 360) % 360 };
 }
 
-function updateSky() {
+function render() {
   const lat = parseFloat(document.getElementById('lat').value) || 0;
   const lng = parseFloat(document.getElementById('lng').value) || 0;
-  const centerAz = parseFloat(document.getElementById('azimuth').value) || 0;
-  const windowFov = parseFloat(document.getElementById('fov').value) || 90;
-  const minAlt = parseFloat(document.getElementById('minAlt').value) || 0;
-  const maxDso = parseInt(document.getElementById('maxDso').value, 10) || 6;
+  const centerAz = parseFloat(document.getElementById('azimuth').value) || 300;
+  const fov = parseFloat(document.getElementById('fov').value) || 90;
+  const minAlt = parseFloat(document.getElementById('minAlt').value) || 20;
 
-  const canvas = document.getElementById('skyCanvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  
-  const rect = canvas.parentElement.getBoundingClientRect();
-  canvas.width = rect.width;
-  canvas.height = rect.height;
+  const showSolar = document.getElementById('chkSolar').checked;
+  const showGalaxies = document.getElementById('chkGalaxy').checked;
+  const showNebulae = document.getElementById('chkNebula').checked;
+  const showClusters = document.getElementById('chkCluster').checked;
+  const showStars = document.getElementById('chkStar').checked;
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const horizonY = 500 * (1 - (minAlt / 90));
+  document.getElementById('horizon').setAttribute('y', horizonY);
+  document.getElementById('horizon').setAttribute('height', 500 - horizonY);
+  document.getElementById('horizonLine').setAttribute('y1', horizonY);
+  document.getElementById('horizonLine').setAttribute('y2', horizonY);
 
-  const dsoList = document.getElementById('dsoList');
-  if (dsoList) dsoList.innerHTML = '';
+  const targetsGroup = document.getElementById('targetsGroup');
+  const targetList = document.getElementById('targetList');
+  targetsGroup.innerHTML = '';
+  targetList.innerHTML = '';
 
-  // Draw Horizon Block
-  const yHorizon = canvas.height * (1 - minAlt / 90);
-  ctx.fillStyle = '#1c1313';
-  ctx.fillRect(0, yHorizon, canvas.width, canvas.height - yHorizon);
-  ctx.strokeStyle = '#ff4444';
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(0, yHorizon);
-  ctx.lineTo(canvas.width, yHorizon);
-  ctx.stroke();
+  const now = new Date();
+  const solarSystemObjects = getSolarSystemObjects(now);
+  const fullCatalog = [...solarSystemObjects, ...CATALOG_DSO];
 
-  // Compute positions
-  const computed = CATALOG.map(obj => {
-    const pos = raDecToAltAz(obj.ra, obj.dec, lat, lng);
-    const azDiff = getAzDifference(pos.az, centerAz);
-    const inFov = Math.abs(azDiff) <= windowFov / 2 && pos.alt >= 0;
-    const isVisible = inFov && pos.alt >= minAlt;
-    return { ...obj, pos, azDiff, inFov, isVisible };
-  });
+  fullCatalog.forEach(obj => {
+    if (obj.category === 'SolarSystem' && !showSolar) return;
+    if (obj.category === 'Galaxy' && !showGalaxies) return;
+    if (obj.category === 'Nebula' && !showNebulae) return;
+    if (obj.category === 'Cluster' && !showClusters) return;
+    if (obj.category === 'Star' && !showStars) return;
 
-  const stars = computed.filter(o => o.type === 'Star' && o.inFov);
-  const dsos = computed.filter(o => o.type !== 'Star' && o.isVisible);
+    const pos = raDecToAltAz(obj.ra, obj.dec, lat, lng, now);
+    const azDiff = getAzDiff(pos.az, centerAz);
+    const inWindow = Math.abs(azDiff) <= fov / 2;
+    const isVisible = inWindow && pos.alt >= minAlt;
 
-  dsos.sort((a, b) => a.mag - b.mag);
-  const selectedDsos = dsos.slice(0, maxDso);
+    if (inWindow) {
+      const x = 400 + (azDiff / (fov / 2)) * 400;
+      const y = 500 * (1 - (pos.alt / 90));
 
-  const renderList = [...stars, ...selectedDsos];
+      let dotColor = "#00d2ff";
+      let dotRadius = "7";
+      if (obj.category === 'Star') { dotColor = "#ffffff"; dotRadius = "4"; }
+      else if (obj.category === 'SolarSystem') { dotColor = obj.color || "#ffb703"; dotRadius = "8"; }
 
-  renderList.forEach(obj => {
-    const x = canvas.width / 2 + (obj.azDiff / windowFov) * canvas.width;
-    const y = canvas.height * (1 - obj.pos.alt / 90);
+      const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      circle.setAttribute("cx", x);
+      circle.setAttribute("cy", y);
+      circle.setAttribute("r", dotRadius);
+      circle.setAttribute("fill", isVisible ? dotColor : "#555555");
+      targetsGroup.appendChild(circle);
 
-    ctx.beginPath();
-    ctx.arc(x, y, obj.type === 'Star' ? 3 : 6, 0, Math.PI * 2);
-    ctx.fillStyle = obj.isVisible ? (obj.type === 'Star' ? '#ffffff' : '#00d2ff') : '#666666';
-    ctx.fill();
+      const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      text.setAttribute("x", x + 10);
+      text.setAttribute("y", y + 4);
+      text.setAttribute("fill", isVisible ? "#ffffff" : "#777777");
+      text.setAttribute("font-size", "13");
+      text.textContent = `${obj.name} (${pos.alt.toFixed(1)}°)`;
+      targetsGroup.appendChild(text);
 
-    ctx.fillStyle = obj.isVisible ? '#e0e6ed' : '#888888';
-    ctx.font = '12px sans-serif';
-    ctx.fillText(`${obj.name} (${obj.pos.alt.toFixed(1)}°)`, x + 8, y + 4);
-
-    if (obj.isVisible && obj.type !== 'Star' && dsoList) {
-      const fovBoxWidth = (2.4 / windowFov) * canvas.width;
-      const fovBoxHeight = (1.2 / 90) * canvas.height;
-      ctx.strokeStyle = 'rgba(0, 210, 255, 0.7)';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(x - fovBoxWidth / 2, y - fovBoxHeight / 2, fovBoxWidth, fovBoxHeight);
-
-      const card = document.createElement('div');
-      card.className = 'dso-card';
-      card.innerHTML = `
-        <h3>${obj.name}</h3>
-        <div><strong>Type:</strong> ${obj.type} | <strong>Mag:</strong> ${obj.mag}</div>
-        <div><strong>Alt:</strong> ${obj.pos.alt.toFixed(1)}° | <strong>Az:</strong> ${obj.pos.az.toFixed(1)}°</div>
-      `;
-      dsoList.appendChild(card);
+      if (isVisible && obj.category !== 'Star') {
+        const card = document.createElement('div');
+        const isSolar = obj.category === 'SolarSystem';
+        card.className = `card ${isSolar ? 'solar-sys' : ''}`;
+        card.innerHTML = `
+          <strong>${obj.name}</strong><br>
+          Type: ${obj.typeName} | Mag: ${obj.mag}<br>
+          Alt: ${pos.alt.toFixed(1)}° | Az: ${pos.az.toFixed(1)}°<br>
+          <div class="badge ${isSolar ? 'solar' : ''}">⏱ Est. Dwarf Stack: ${calcExposure(obj.category, obj.mag)}</div>
+        `;
+        targetList.appendChild(card);
+      }
     }
   });
 }
 
-function getGPS() {
+['lat', 'lng', 'azimuth', 'fov', 'minAlt', 'chkSolar', 'chkGalaxy', 'chkNebula', 'chkCluster', 'chkStar'].forEach(id => {
+  document.getElementById(id).addEventListener('input', render);
+  document.getElementById(id).addEventListener('change', render);
+});
+
+document.getElementById('btnGps').addEventListener('click', () => {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(p => {
       document.getElementById('lat').value = p.coords.latitude.toFixed(4);
       document.getElementById('lng').value = p.coords.longitude.toFixed(4);
-      document.getElementById('elevation').value = p.coords.altitude ? Math.round(p.coords.altitude) : 0;
-      updateSky();
-    }, () => alert("Could not fetch geolocation. Input coordinates manually."));
+      render();
+    }, () => alert("GPS unavailable. Please enter coordinates manually."));
   }
-}
-
-// Bind event listeners safely once DOM content is ready
-document.addEventListener('DOMContentLoaded', () => {
-  const inputs = document.querySelectorAll('.panel input');
-  inputs.forEach(input => {
-    input.addEventListener('input', updateSky);
-  });
-  
-  document.getElementById('btnGPS').addEventListener('click', getGPS);
-  window.addEventListener('resize', updateSky);
-
-  updateSky();
 });
+
+render();
 </script>
 </body>
 </html>
