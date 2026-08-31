@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dwarf Mini Apartment Stargazer</title>
+  <style>
+    :root {
+      --bg: #0b0e14;
+      --card: #151922;
+      --accent: #00d2ff;
+      --text: #e0e6ed;
+      --dim: #8892b0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: grid;
+      grid-template-columns: 320px 1fr 320px;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .panel {
+      background: var(--card);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      overflow-y: auto;
+      border-right: 1px solid #232936;
+    }
+    .panel-right { border-right: none; border-left: 1px solid #232936; }
+    h2 { font-size: 1.1rem; margin: 0.5rem 0 0.25rem 0; color: var(--accent); }
+    label { font-size: 0.85rem; color: var(--dim); display: block; margin-top: 0.25rem; }
+    input {
+      width: 100%;
+      padding: 0.5rem;
+      background: #0b0e14;
+      border: 1px solid #232936;
+      color: #fff;
+      border-radius: 4px;
+    }
+    button {
+      background: var(--accent);
+      color: #000;
+      font-weight: bold;
+      border: none;
+      padding: 0.6rem;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 0.5rem;
+    }
+    .canvas-container { position: relative; width: 100%; height: 100%; overflow: hidden; }
+    canvas { width: 100%; height: 100%; background: #05070a; display: block; }
+    .dso-card {
+      background: #0b0e14;
+      padding: 0.75rem;
+      border-radius: 4px;
+      border-left: 3px solid var(--accent);
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+    .dso-card h3 { margin: 0 0 0.25rem 0; font-size: 0.95rem; }
+  </style>
+</head>
+<body>
+
+  <!-- Controls Panel -->
+  <div class="panel">
+    <h2>Observer Location</h2>
+    <button id="btnGPS">Detect GPS Location</button>
+    
+    <label>Latitude (°)</label>
+    <input type="number" id="lat" value="38.1157" step="0.0001">
+    
+    <label>Longitude (°)</label>
+    <input type="number" id="lng" value="13.3613" step="0.0001">
+    
+    <label>Elevation (m)</label>
+    <input type="number" id="elevation" value="35">
+
+    <h2>Window View Settings</h2>
+    <label>Facing Azimuth (° Center)</label>
+    <input type="number" id="azimuth" value="180" min="0" max="360">
+    
+    <label>Field of View Window (° Horizontal)</label>
+    <input type="number" id="fov" value="90" min="20" max="180">
+
+    <label>Min Horizon / Railing Altitude (°)</label>
+    <input type="number" id="minAlt" value="20" min="0" max="90">
+
+    <h2>Filter Settings</h2>
+    <label>Max DSOs to Display</label>
+    <input type="number" id="maxDso" value="6" min="1" max="20">
+  </div>
+
+  <!-- Sky Canvas Preview -->
+  <div class="canvas-container">
+    <canvas id="skyCanvas"></canvas>
+  </div>
+
+  <!-- Recommendations Panel -->
+  <div class="panel panel-right">
+    <h2>Dwarf Mini DSO Targets</h2>
+    <p style="font-size: 0.8rem; color: var(--dim);">Targets inside your window frame optimized for Dwarf Mini (~2.4°x1.2° FOV).</p>
+    <div id="dsoList"></div>
+  </div>
+
+<script>
+const CATALOG = [
+  { name: "M31 Andromeda Galaxy", ra: 10.68, dec: 41.27, mag: 3.4, type: "Galaxy" },
+  { name: "M42 Orion Nebula", ra: 83.82, dec: -5.39, mag: 4.0, type: "Nebula" },
+  { name: "M45 Pleiades Cluster", ra: 56.87, dec: 24.11, mag: 1.6, type: "Cluster" },
+  { name: "M51 Whirlpool Galaxy", ra: 202.47, dec: 47.19, mag: 8.4, type: "Galaxy" },
+  { name: "M8 Lagoon Nebula", ra: 270.92, dec: -24.38, mag: 6.0, type: "Nebula" },
+  { name: "M13 Hercules Cluster", ra: 250.42, dec: 36.46, mag: 5.8, type: "Cluster" },
+  { name: "M27 Dumbbell Nebula", ra: 299.90, dec: 22.72, mag: 7.5, type: "Nebula" },
+  { name: "M57 Ring Nebula", ra: 283.40, dec: 33.03, mag: 8.8, type: "Nebula" },
+  { name: "M20 Trifid Nebula", ra: 270.63, dec: -23.03, mag: 6.3, type: "Nebula" },
+  { name: "M16 Eagle Nebula", ra: 274.70, dec: -13.81, mag: 6.0, type: "Nebula" },
+  { name: "M17 Swan Nebula", ra: 275.20, dec: -16.18, mag: 6.0, type: "Nebula" },
+  { name: "M33 Triangulum Galaxy", ra: 23.46, dec: 30.66, mag: 5.7, type: "Galaxy" },
+  { name: "Vega", ra: 279.23, dec: 38.78, mag: 0.0, type: "Star" },
+  { name: "Betelgeuse", ra: 88.79, dec: 7.41, mag: 0.5, type: "Star" },
+  { name: "Sirius", ra: 101.28, dec: -16.72, mag: -1.46, type: "Star" },
+  { name: "Polaris", ra: 37.95, dec: 89.26, mag: 1.97, type: "Star" }
+];
+
+function getAzDifference(targetAz, centerAz) {
+  let diff = (targetAz - centerAz) % 360;
+  if (diff < -180) diff += 360;
+  if (diff > 180) diff -= 360;
+  return diff;
+}
+
+function raDecToAltAz(raDeg, decDeg, latDeg, lngDeg, date = new Date()) {
+  const rad = Math.PI / 180;
+  const lat = latDeg * rad;
+  const dec = decDeg * rad;
+  
+  const d = (date - new Date(Date.UTC(2000, 0, 1, 12, 0, 0))) / 86400000;
+  const gst = (280.4606183 + 360.98564736629 * d) % 360;
+  const lst = (gst + lngDeg + 360) % 360;
+  
+  const ha = (lst - raDeg + 360) % 360 * rad;
+  
+  const alt = Math.asin(Math.sin(lat) * Math.sin(dec) + Math.cos(lat) * Math.cos(dec) * Math.cos(ha));
+  const az = Math.atan2(-Math.cos(dec) * Math.sin(ha), Math.sin(dec) * Math.cos(lat) - Math.cos(dec) * Math.sin(lat) * Math.cos(ha));
+  
+  return {
+    alt: alt / rad,
+    az: (az / rad + 360) % 360
+  };
+}
+
+function updateSky() {
+  const lat = parseFloat(document.getElementById('lat').value) || 0;
+  const lng = parseFloat(document.getElementById('lng').value) || 0;
+  const centerAz = parseFloat(document.getElementById('azimuth').value) || 0;
+  const windowFov = parseFloat(document.getElementById('fov').value) || 90;
+  const minAlt = parseFloat(document.getElementById('minAlt').value) || 0;
+  const maxDso = parseInt(document.getElementById('maxDso').value, 10) || 6;
+
+  const canvas = document.getElementById('skyCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width;
+  canvas.height = rect.height;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const dsoList = document.getElementById('dsoList');
+  if (dsoList) dsoList.innerHTML = '';
+
+  // Draw Horizon Block
+  const yHorizon = canvas.height * (1 - minAlt / 90);
+  ctx.fillStyle = '#1c1313';
+  ctx.fillRect(0, yHorizon, canvas.width, canvas.height - yHorizon);
+  ctx.strokeStyle = '#ff4444';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(0, yHorizon);
+  ctx.lineTo(canvas.width, yHorizon);
+  ctx.stroke();
+
+  // Compute positions
+  const computed = CATALOG.map(obj => {
+    const pos = raDecToAltAz(obj.ra, obj.dec, lat, lng);
+    const azDiff = getAzDifference(pos.az, centerAz);
+    const inFov = Math.abs(azDiff) <= windowFov / 2 && pos.alt >= 0;
+    const isVisible = inFov && pos.alt >= minAlt;
+    return { ...obj, pos, azDiff, inFov, isVisible };
+  });
+
+  const stars = computed.filter(o => o.type === 'Star' && o.inFov);
+  const dsos = computed.filter(o => o.type !== 'Star' && o.isVisible);
+
+  dsos.sort((a, b) => a.mag - b.mag);
+  const selectedDsos = dsos.slice(0, maxDso);
+
+  const renderList = [...stars, ...selectedDsos];
+
+  renderList.forEach(obj => {
+    const x = canvas.width / 2 + (obj.azDiff / windowFov) * canvas.width;
+    const y = canvas.height * (1 - obj.pos.alt / 90);
+
+    ctx.beginPath();
+    ctx.arc(x, y, obj.type === 'Star' ? 3 : 6, 0, Math.PI * 2);
+    ctx.fillStyle = obj.isVisible ? (obj.type === 'Star' ? '#ffffff' : '#00d2ff') : '#666666';
+    ctx.fill();
+
+    ctx.fillStyle = obj.isVisible ? '#e0e6ed' : '#888888';
+    ctx.font = '12px sans-serif';
+    ctx.fillText(`${obj.name} (${obj.pos.alt.toFixed(1)}°)`, x + 8, y + 4);
+
+    if (obj.isVisible && obj.type !== 'Star' && dsoList) {
+      const fovBoxWidth = (2.4 / windowFov) * canvas.width;
+      const fovBoxHeight = (1.2 / 90) * canvas.height;
+      ctx.strokeStyle = 'rgba(0, 210, 255, 0.7)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x - fovBoxWidth / 2, y - fovBoxHeight / 2, fovBoxWidth, fovBoxHeight);
+
+      const card = document.createElement('div');
+      card.className = 'dso-card';
+      card.innerHTML = `
+        <h3>${obj.name}</h3>
+        <div><strong>Type:</strong> ${obj.type} | <strong>Mag:</strong> ${obj.mag}</div>
+        <div><strong>Alt:</strong> ${obj.pos.alt.toFixed(1)}° | <strong>Az:</strong> ${obj.pos.az.toFixed(1)}°</div>
+      `;
+      dsoList.appendChild(card);
+    }
+  });
+}
+
+function getGPS() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(p => {
+      document.getElementById('lat').value = p.coords.latitude.toFixed(4);
+      document.getElementById('lng').value = p.coords.longitude.toFixed(4);
+      document.getElementById('elevation').value = p.coords.altitude ? Math.round(p.coords.altitude) : 0;
+      updateSky();
+    }, () => alert("Could not fetch geolocation. Input coordinates manually."));
+  }
+}
+
+// Bind event listeners safely once DOM content is ready
+document.addEventListener('DOMContentLoaded', () => {
+  const inputs = document.querySelectorAll('.panel input');
+  inputs.forEach(input => {
+    input.addEventListener('input', updateSky);
+  });
+  
+  document.getElementById('btnGPS').addEventListener('click', getGPS);
+  window.addEventListener('resize', updateSky);
+
+  updateSky();
+});
+</script>
+</body>
+</html>
