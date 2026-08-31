@@ -7,7 +7,7 @@ A simple standalone app for finding deep sky objects (nebulas, galaxies, ...) fr
 This is particulary useful when wanting to observe deep sky objects from an apartment with only windows to watch the sky!
 
 
-[Open the app](./app.html)
+[Open the app](https://k4rm.github.io/deep_sky_spot/app.html)
 
 
 Enjoy!
