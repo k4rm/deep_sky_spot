@@ -2,9 +2,11 @@ Deep Sky Spot
 -------------
 
 
-A simple standalone app for finding deep sky objects (nebulas, galaxies, ...) from a position on Eartch (latitude / longitude / elevation) and an azimuth.
+A simple standalone app for finding deep sky objects (nebulas, galaxies, ...) from a position on Earth (latitude / longitude / elevation) and an azimuth.
 
 This is particulary useful when wanting to observe deep sky objects from an apartment with only windows to watch the sky!
+
+Written for the Dwarf Mini in mind, but can be used with other telescopes.
 
 
 [Open the app](https://k4rm.github.io/deep_sky_spot/app.html)
