@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dwarf Mini Stargazer</title>
+  <title>Dwarf Mini Stargazer - Ultra (100+ Objects)</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -14,10 +14,11 @@
       height: 100vh;
       width: 100vw;
       overflow: hidden;
+      user-select: none;
     }
     .panel {
-      width: 300px;
-      min-width: 300px;
+      width: 320px;
+      min-width: 320px;
       background: #151922;
       padding: 15px;
       display: flex;
@@ -25,6 +26,7 @@
       gap: 10px;
       overflow-y: auto;
       border-right: 1px solid #232936;
+      z-index: 10;
     }
     .panel-right { border-right: none; border-left: 1px solid #232936; }
     .viewport {
@@ -33,7 +35,10 @@
       display: flex;
       flex-direction: column;
       position: relative;
+      cursor: grab;
+      overflow: hidden;
     }
+    .viewport:active { cursor: grabbing; }
     svg {
       width: 100%;
       height: 100%;
@@ -41,7 +46,7 @@
     }
     h2 { font-size: 0.95rem; color: #00d2ff; margin-top: 5px; }
     label { font-size: 0.8rem; color: #8892b0; display: block; margin-top: 4px; }
-    input[type="number"] {
+    input[type="number"], input[type="text"] {
       width: 100%;
       padding: 6px 8px;
       background: #0b0e14;
@@ -51,6 +56,7 @@
       border-radius: 4px;
       margin-top: 2px;
     }
+    input[type="text"] { color: #ffffff; font-weight: normal; }
     button {
       background: #00d2ff;
       color: #000;
@@ -60,6 +66,7 @@
       border-radius: 4px;
       cursor: pointer;
       margin-top: 2px;
+      transition: background 0.15s;
     }
     button:hover { background: #33d9ff; }
     
@@ -80,10 +87,7 @@
       color: #e0e6ed;
       cursor: pointer;
     }
-    .filter-item input {
-      accent-color: #00d2ff;
-      cursor: pointer;
-    }
+    .filter-item input { accent-color: #00d2ff; cursor: pointer; }
 
     .card {
       background: #0b0e14;
@@ -92,10 +96,15 @@
       border-left: 3px solid #00d2ff;
       font-size: 0.8rem;
       margin-bottom: 8px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
     }
-    .card.solar-sys {
-      border-left-color: #ffb703;
-    }
+    .card:hover { background: #151922; }
+    .card.selected { border-left-color: #ff0055 !important; background: #1c2230; }
+    .card.solar-sys { border-left-color: #ffb703; }
+    .card.nebula { border-left-color: #ff64c8; }
+    .card.cluster { border-left-color: #00ffaa; }
+    
     .badge {
       display: inline-block;
       margin-top: 5px;
@@ -105,9 +114,72 @@
       border-radius: 3px;
       font-weight: bold;
     }
-    .badge.solar {
-      background: rgba(255,183,3,0.2);
-      color: #ffb703;
+    .badge.solar { background: rgba(255,183,3,0.2); color: #ffb703; }
+
+    /* FOV Inspector */
+    .fov-box {
+      background: #0b0e14;
+      border: 1px solid #232936;
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    .fov-canvas-container {
+      width: 100%;
+      height: 160px;
+      background: #020305;
+      border: 1px solid #00d2ff44;
+      border-radius: 4px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+    .fov-details { font-size: 0.75rem; color: #a0aec0; margin-top: 8px; line-height: 1.4; }
+    .fov-details strong { color: #00d2ff; }
+
+    .target-node { cursor: pointer; }
+    .target-node:hover circle { stroke: #ffffff; stroke-width: 2px; }
+
+    /* Map Overlay HUD controls */
+    .map-controls {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      z-index: 20;
+    }
+    .map-btn {
+      width: 32px;
+      height: 32px;
+      background: #151922;
+      border: 1px solid #232936;
+      color: #00d2ff;
+      font-size: 1.1rem;
+      font-weight: bold;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    }
+    .map-btn:hover { background: #232936; color: #fff; }
+    .map-hint {
+      position: absolute;
+      bottom: 15px;
+      left: 15px;
+      background: rgba(11, 14, 20, 0.75);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      color: #8892b0;
+      pointer-events: none;
+      border: 1px solid #232936;
     }
   </style>
 </head>
@@ -155,7 +227,14 @@
   </div>
 
   <!-- SVG SKY RENDER -->
-  <div class="viewport">
+  <div class="viewport" id="viewport">
+    <div class="map-controls">
+      <div class="map-btn" id="btnZoomIn" title="Zoom In (+)">+</div>
+      <div class="map-btn" id="btnZoomOut" title="Zoom Out (−)">−</div>
+      <div class="map-btn" id="btnReset" title="Reset View">⟲</div>
+    </div>
+    <div class="map-hint">🖱️ Drag to Pan Azimuth | Scroll Wheel to Zoom FOV</div>
+
     <svg id="sky" viewBox="0 0 800 500" preserveAspectRatio="none">
       <line x1="0" y1="125" x2="800" y2="125" stroke="#1f293d" stroke-dasharray="4"/>
       <line x1="0" y1="250" x2="800" y2="250" stroke="#1f293d" stroke-dasharray="4"/>
@@ -168,40 +247,149 @@
     </svg>
   </div>
 
-  <!-- VISIBLE TARGETS LIST -->
+  <!-- VISIBLE TARGETS & FOV PANEL -->
   <div class="panel panel-right">
-    <h2>Visible DSO & Planets</h2>
-    <div id="targetList"></div>
+    <h2>Sensor Framing FOV</h2>
+    <div class="fov-box">
+      <div id="fovTitle" style="font-weight: bold; color: #ff0055;">Select a target</div>
+      <div class="fov-canvas-container">
+        <canvas id="fovCanvas" width="260" height="160"></canvas>
+      </div>
+      <div class="fov-details" id="fovMetrics">
+        Click any target dot on the map or list below to preview sensor framing & field details.
+      </div>
+    </div>
+
+    <h2>Visible Objects (<span id="visibleCount">0</span>)</h2>
+    <input type="text" id="txtSearch" placeholder="Search 100+ targets (M, NGC, IC)...">
+    <div id="targetList" style="margin-top: 8px;"></div>
   </div>
 
 <script>
-// Fixed DSO & Star Catalog
+// Extended Catalog with 100+ Deep Sky Objects and Reference Stars
 const CATALOG_DSO = [
-  { name: "M31 Andromeda Galaxy", ra: 10.68, dec: 41.27, mag: 3.4, category: "Galaxy", typeName: "Galaxy" },
-  { name: "M33 Triangulum Galaxy", ra: 23.46, dec: 30.66, mag: 5.7, category: "Galaxy", typeName: "Galaxy" },
-  { name: "M51 Whirlpool Galaxy", ra: 202.47, dec: 47.19, mag: 8.4, category: "Galaxy", typeName: "Galaxy" },
-  { name: "M81 Bode's Galaxy", ra: 148.89, dec: 69.07, mag: 6.9, category: "Galaxy", typeName: "Galaxy" },
-  { name: "M101 Pinwheel Galaxy", ra: 210.80, dec: 54.35, mag: 7.9, category: "Galaxy", typeName: "Galaxy" },
-  { name: "M42 Orion Nebula", ra: 83.82, dec: -5.39, mag: 4.0, category: "Nebula", typeName: "Emission Nebula" },
-  { name: "M27 Dumbbell Nebula", ra: 299.90, dec: 22.72, mag: 7.5, category: "Nebula", typeName: "Planetary Nebula" },
-  { name: "M57 Ring Nebula", ra: 283.40, dec: 33.03, mag: 8.8, category: "Nebula", typeName: "Planetary Nebula" },
-  { name: "M45 Pleiades Cluster", ra: 56.87, dec: 24.11, mag: 1.6, category: "Cluster", typeName: "Open Cluster" },
-  { name: "M13 Hercules Cluster", ra: 250.42, dec: 36.46, mag: 5.8, category: "Cluster", typeName: "Globular Cluster" },
-  { name: "Deneb (Reference Star)", ra: 310.36, dec: 45.28, mag: 1.25, category: "Star", typeName: "Star" },
-  { name: "Vega (Reference Star)", ra: 279.23, dec: 38.78, mag: 0.0, category: "Star", typeName: "Star" },
-  { name: "Polaris (North Star)", ra: 37.95, dec: 89.26, mag: 1.97, category: "Star", typeName: "Star" }
+  // --- GALAXIES (30) ---
+  { id: "m31", name: "M31 Andromeda Galaxy", ra: 10.68, dec: 41.27, mag: 3.4, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 190 },
+  { id: "m32", name: "M32 Satellite of Andromeda", ra: 10.67, dec: 40.87, mag: 8.1, category: "Galaxy", typeName: "Dwarf Elliptical", sizeArcmin: 8.5 },
+  { id: "m33", name: "M33 Triangulum Galaxy", ra: 23.46, dec: 30.66, mag: 5.7, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 73 },
+  { id: "m49", name: "M49 Virgo Elliptical", ra: 187.44, dec: 8.00, mag: 4.9, category: "Galaxy", typeName: "Elliptical Galaxy", sizeArcmin: 10.2 },
+  { id: "m51", name: "M51 Whirlpool Galaxy", ra: 202.47, dec: 47.19, mag: 8.4, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 11 },
+  { id: "m58", name: "M58 Barred Spiral", ra: 189.43, dec: 11.82, mag: 9.7, category: "Galaxy", typeName: "Barred Spiral", sizeArcmin: 5.9 },
+  { id: "m59", name: "M59 Virgo Galaxy", ra: 190.51, dec: 11.65, mag: 9.6, category: "Galaxy", typeName: "Elliptical Galaxy", sizeArcmin: 5.4 },
+  { id: "m60", name: "M60 Elliptical Galaxy", ra: 190.92, dec: 11.55, mag: 8.8, category: "Galaxy", typeName: "Elliptical Galaxy", sizeArcmin: 7.6 },
+  { id: "m61", name: "M61 Barred Spiral", ra: 185.48, dec: 4.47, mag: 9.7, category: "Galaxy", typeName: "Barred Spiral", sizeArcmin: 6.5 },
+  { id: "m63", name: "M63 Sunflower Galaxy", ra: 198.95, dec: 42.03, mag: 8.6, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 12 },
+  { id: "m64", name: "M64 Black Eye Galaxy", ra: 194.18, dec: 21.68, mag: 8.5, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 10 },
+  { id: "m65", name: "M65 Leo Triplet", ra: 164.73, dec: 13.09, mag: 9.3, category: "Galaxy", typeName: "Intermediate Spiral", sizeArcmin: 9.8 },
+  { id: "m66", name: "M66 Leo Triplet", ra: 165.02, dec: 12.99, mag: 8.9, category: "Galaxy", typeName: "Barred Spiral", sizeArcmin: 9.1 },
+  { id: "m74", name: "M74 Phantom Galaxy", ra: 24.17, dec: 15.78, mag: 9.4, category: "Galaxy", typeName: "Sc Spiral", sizeArcmin: 10.5 },
+  { id: "m77", name: "M77 Cetus A", ra: 42.67, dec: -0.01, mag: 8.9, category: "Galaxy", typeName: "Seyfert Spiral", sizeArcmin: 7.1 },
+  { id: "m81", name: "M81 Bode's Galaxy", ra: 148.89, dec: 69.07, mag: 6.9, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 27 },
+  { id: "m82", name: "M82 Cigar Galaxy", ra: 148.96, dec: 69.68, mag: 8.4, category: "Galaxy", typeName: "Starburst Galaxy", sizeArcmin: 11 },
+  { id: "m83", name: "M83 Southern Pinwheel", ra: 204.25, dec: -29.87, mag: 7.5, category: "Galaxy", typeName: "Barred Spiral", sizeArcmin: 12.9 },
+  { id: "m84", name: "M84 Markarian's Chain", ra: 186.27, dec: 12.88, mag: 9.1, category: "Galaxy", typeName: "Lenticular Galaxy", sizeArcmin: 6.5 },
+  { id: "m85", name: "M85 Coma Lenticular", ra: 186.35, dec: 18.19, mag: 9.1, category: "Galaxy", typeName: "Lenticular Galaxy", sizeArcmin: 7.1 },
+  { id: "m87", name: "M87 Virgo A", ra: 187.70, dec: 12.39, mag: 8.6, category: "Galaxy", typeName: "Elliptical Galaxy", sizeArcmin: 7 },
+  { id: "m88", name: "M88 Spiral", ra: 187.99, dec: 14.42, mag: 9.6, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 6.9 },
+  { id: "m89", name: "M89 Elliptical", ra: 188.92, dec: 12.56, mag: 9.8, category: "Galaxy", typeName: "Elliptical Galaxy", sizeArcmin: 5.1 },
+  { id: "m90", name: "M90 Spiral", ra: 189.21, dec: 13.16, mag: 9.5, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 9.5 },
+  { id: "m94", name: "M94 Cat's Eye Galaxy", ra: 192.72, dec: 41.12, mag: 8.2, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 11.2 },
+  { id: "m95", name: "M95 Barred Spiral", ra: 160.99, dec: 11.70, mag: 9.7, category: "Galaxy", typeName: "Barred Spiral", sizeArcmin: 7.4 },
+  { id: "m96", name: "M96 Leo Galaxy", ra: 161.69, dec: 11.82, mag: 9.2, category: "Galaxy", typeName: "Intermediate Spiral", sizeArcmin: 7.6 },
+  { id: "m101", name: "M101 Pinwheel Galaxy", ra: 210.80, dec: 54.35, mag: 7.9, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 28 },
+  { id: "m104", name: "M104 Sombrero Galaxy", ra: 189.99, dec: -11.62, mag: 8.0, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 9 },
+  { id: "m106", name: "M106 Canes Venatici", ra: 184.74, dec: 47.30, mag: 8.4, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 18.6 },
+  { id: "ngc253", name: "NGC 253 Sculptor Galaxy", ra: 11.89, dec: -25.29, mag: 7.2, category: "Galaxy", typeName: "Intermediate Spiral", sizeArcmin: 27.5 },
+  { id: "ngc891", name: "NGC 891 Outer Limits", ra: 35.64, dec: 42.35, mag: 9.9, category: "Galaxy", typeName: "Edge-on Spiral", sizeArcmin: 13.5 },
+  { id: "ngc2403", name: "NGC 2403 Spiral", ra: 114.21, dec: 65.60, mag: 8.9, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 21.9 },
+  { id: "c23", name: "Caldwell 23 Silver Needle", ra: 186.36, dec: 32.22, mag: 9.5, category: "Galaxy", typeName: "Edge-on Spiral", sizeArcmin: 11 },
+
+  // --- NEBULAE (30) ---
+  { id: "m1", name: "M1 Crab Nebula", ra: 83.63, dec: 22.01, mag: 8.4, category: "Nebula", typeName: "Supernova Remnant", sizeArcmin: 6 },
+  { id: "m8", name: "M8 Lagoon Nebula", ra: 271.08, dec: -24.38, mag: 6.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 90 },
+  { id: "m16", name: "M16 Eagle Nebula", ra: 274.70, dec: -13.79, mag: 6.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 35 },
+  { id: "m17", name: "M17 Omega / Swan Nebula", ra: 275.20, dec: -16.17, mag: 6.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 11 },
+  { id: "m20", name: "M20 Trifid Nebula", ra: 270.63, dec: -23.03, mag: 6.3, category: "Nebula", typeName: "Emission / Reflection", sizeArcmin: 28 },
+  { id: "m27", name: "M27 Dumbbell Nebula", ra: 299.90, dec: 22.72, mag: 7.5, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 8 },
+  { id: "m42", name: "M42 Orion Nebula", ra: 83.82, dec: -5.39, mag: 4.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 65 },
+  { id: "m43", name: "M43 De Mairan's Nebula", ra: 83.89, dec: -5.27, mag: 9.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 20 },
+  { id: "m57", name: "M57 Ring Nebula", ra: 283.40, dec: 33.03, mag: 8.8, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 2.5 },
+  { id: "m76", name: "M76 Little Dumbbell", ra: 25.59, dec: 51.57, mag: 10.1, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 2.7 },
+  { id: "m78", name: "M78 Reflection Nebula", ra: 86.67, dec: 0.08, mag: 8.3, category: "Nebula", typeName: "Reflection Nebula", sizeArcmin: 8 },
+  { id: "m97", name: "M97 Owl Nebula", ra: 168.70, dec: 55.02, mag: 9.9, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 3.4 },
+  { id: "ic434", name: "IC 434 Horsehead Nebula", ra: 85.24, dec: -2.46, mag: 7.3, category: "Nebula", typeName: "Dark / Emission", sizeArcmin: 60 },
+  { id: "ic1396", name: "IC 1396 Elephant's Trunk", ra: 324.73, dec: 57.49, mag: 3.5, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 170 },
+  { id: "ic1805", name: "IC 1805 Heart Nebula", ra: 38.20, dec: 61.45, mag: 6.5, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 100 },
+  { id: "ic1848", name: "IC 1848 Soul Nebula", ra: 43.80, dec: 60.40, mag: 6.5, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 90 },
+  { id: "ic5070", name: "IC 5070 Pelican Nebula", ra: 312.70, dec: 44.35, mag: 8.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 60 },
+  { id: "ngc1499", name: "NGC 1499 California Nebula", ra: 60.83, dec: 36.62, mag: 6.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 160 },
+  { id: "ngc2024", name: "NGC 2024 Flame Nebula", ra: 85.42, dec: -1.85, mag: 10.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 30 },
+  { id: "ngc2237", name: "NGC 2237 Rosette Nebula", ra: 97.98, dec: 4.99, mag: 9.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 80 },
+  { id: "ngc2392", name: "NGC 2392 Eskimo Nebula", ra: 112.29, dec: 20.91, mag: 9.1, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.8 },
+  { id: "ngc6888", name: "NGC 6888 Crescent Nebula", ra: 303.06, dec: 38.35, mag: 7.4, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 18 },
+  { id: "ngc6960", name: "NGC 6960 Western Veil", ra: 311.37, dec: 30.72, mag: 7.0, category: "Nebula", typeName: "Supernova Remnant", sizeArcmin: 70 },
+  { id: "ngc6992", name: "NGC 6992 Eastern Veil", ra: 314.11, dec: 31.72, mag: 7.0, category: "Nebula", typeName: "Supernova Remnant", sizeArcmin: 60 },
+  { id: "ngc7000", name: "NGC 7000 North America", ra: 314.72, dec: 44.37, mag: 4.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 120 },
+  { id: "ngc7293", name: "NGC 7293 Helix Nebula", ra: 337.41, dec: -20.84, mag: 7.6, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 25 },
+  { id: "ngc7635", name: "NGC 7635 Bubble Nebula", ra: 350.21, dec: 61.20, mag: 10.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 15 },
+  { id: "b33", name: "Barnard 33 Horsehead Dark", ra: 85.25, dec: -2.46, mag: 11.0, category: "Nebula", typeName: "Dark Nebula", sizeArcmin: 8 },
+  { id: "b142", name: "Barnard 142 E-Nebula", ra: 297.00, dec: 18.00, mag: 9.5, category: "Nebula", typeName: "Dark Nebula", sizeArcmin: 40 },
+  { id: "c11", name: "Caldwell 11 Bubble Nebula", ra: 350.21, dec: 61.20, mag: 10.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 15 },
+
+  // --- STAR CLUSTERS (25) ---
+  { id: "m2", name: "M2 Globular Cluster", ra: 323.36, dec: -0.82, mag: 6.3, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 16 },
+  { id: "m3", name: "M3 Globular Cluster", ra: 205.55, dec: 28.38, mag: 6.2, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 18 },
+  { id: "m4", name: "M4 Scorpius Globular", ra: 245.89, dec: -26.53, mag: 5.9, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 26 },
+  { id: "m5", name: "M5 Globular Cluster", ra: 229.64, dec: 2.08, mag: 6.6, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 23 },
+  { id: "m6", name: "M6 Butterfly Cluster", ra: 264.98, dec: -32.22, mag: 4.2, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 25 },
+  { id: "m7", name: "M7 Ptolemy's Cluster", ra: 268.46, dec: -34.82, mag: 3.3, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 80 },
+  { id: "m10", name: "M10 Ophiuchus Globular", ra: 254.29, dec: -4.10, mag: 6.4, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 20 },
+  { id: "m11", name: "M11 Wild Duck Cluster", ra: 277.72, dec: -6.27, mag: 6.3, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 14 },
+  { id: "m12", name: "M12 Globular Cluster", ra: 254.74, dec: -1.94, mag: 6.7, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 16 },
+  { id: "m13", name: "M13 Hercules Cluster", ra: 250.42, dec: 36.46, mag: 5.8, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 20 },
+  { id: "m15", name: "M15 Pegasus Cluster", ra: 322.49, dec: 12.17, mag: 6.2, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 18 },
+  { id: "m22", name: "M22 Sagittarius Cluster", ra: 279.10, dec: -23.90, mag: 5.1, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 32 },
+  { id: "m34", name: "M34 Perseus Open", ra: 40.52, dec: 42.78, mag: 5.5, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 35 },
+  { id: "m35", name: "M35 Gemini Open Cluster", ra: 92.23, dec: 24.34, mag: 5.3, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 28 },
+  { id: "m36", name: "M36 Pinwheel Open", ra: 84.03, dec: 34.14, mag: 6.3, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 12 },
+  { id: "m37", name: "M37 Auriga Open Cluster", ra: 88.08, dec: 32.55, mag: 5.6, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 24 },
+  { id: "m38", name: "M38 Starfish Cluster", ra: 87.17, dec: 35.85, mag: 7.4, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 21 },
+  { id: "m44", name: "M44 Beehive Cluster", ra: 130.10, dec: 19.67, mag: 3.7, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 95 },
+  { id: "m45", name: "M45 Pleiades Cluster", ra: 56.87, dec: 24.11, mag: 1.6, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 110 },
+  { id: "m67", name: "M67 Old Open Cluster", ra: 132.83, dec: 11.82, mag: 6.1, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 30 },
+  { id: "m92", name: "M92 Hercules Globular", ra: 258.28, dec: 43.14, mag: 6.3, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 14 },
+  { id: "c14", name: "Caldwell 14 Double Cluster", ra: 35.15, dec: 57.13, mag: 3.7, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 60 },
+  { id: "c41", name: "Caldwell 41 Hyades", ra: 66.75, dec: 15.87, mag: 0.5, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 330 },
+  { id: "ngc869", name: "NGC 869 h Persei", ra: 34.75, dec: 57.15, mag: 5.3, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 30 },
+  { id: "ngc884", name: "NGC 884 chi Persei", ra: 35.55, dec: 57.13, mag: 6.1, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 30 },
+
+  // --- REFERENCE BRIGHT STARS (15) ---
+  { id: "sirius", name: "Sirius (Canis Major)", ra: 101.29, dec: -16.72, mag: -1.46, category: "Star", typeName: "Star", sizeArcmin: 1 },
+  { id: "canopus", name: "Canopus (Carina)", ra: 95.99, dec: -52.70, mag: -0.74, category: "Star", typeName: "Star", sizeArcmin: 1 },
+  { id: "arcturus", name: "Arcturus (Boötes)", ra: 213.91, dec: 19.18, mag: -0.05, category: "Star", typeName: "Star", sizeArcmin: 1 },
+  { id: "rigil_kent", name: "Alpha Centauri", ra: 219.90, dec: -60.83, mag: -0.27, category: "Star", typeName: "Star", sizeArcmin: 1 },
+  { id: "vega", name: "Vega (Lyra)", ra: 279.23, dec: 38.78, mag: 0.03, category: "Star", typeName: "Star", sizeArcmin: 1 },
+  { id: "capella", name: "Capella (Auriga)", ra: 79.17, dec: 45.99, mag: 0.08, category: "Star", typeName: "Star", sizeArcmin: 1 },
+  { id: "rigel", name: "Rigel (Orion)", ra: 78.63, dec: -8.20, mag: 0.13, category: "Star", typeName: "Star", sizeArcmin: 1 },
+  { id: "procyon", name: "Procyon (Canis Minor)", ra: 114.83, dec: 5.22, mag: 0.34, category: "Star", typeName: "Star", sizeArcmin: 1 },
+  { id: "betelgeuse", name: "Betelgeuse (Orion)", ra: 88.79, dec: 7.41, mag: 0.50, category: "Star", typeName: "Star", sizeArcmin: 1 },
+  { id: "achernar", name: "Achernar (Eridanus)", ra: 24.43, dec: -57.24, mag: 0.45, category: "Star", typeName: "Star", sizeArcmin: 1 },
+  { id: "hadar", name: "Hadar (Centaurus)", ra: 210.95, dec: -60.37, mag: 0.61, category: "Star", typeName: "Star", sizeArcmin: 1 },
+  { id: "altair", name: "Altair (Aquila)", ra: 297.70, dec: 8.87, mag: 0.77, category: "Star", typeName: "Star", sizeArcmin: 1 },
+  { id: "aldebaran", name: "Aldebaran (Taurus)", ra: 68.98, dec: 16.51, mag: 0.85, category: "Star", typeName: "Star", sizeArcmin: 1 },
+  { id: "deneb", name: "Deneb (Cygnus)", ra: 310.36, dec: 45.28, mag: 1.25, category: "Star", typeName: "Star", sizeArcmin: 1 },
+  { id: "polaris", name: "Polaris (Ursa Minor)", ra: 37.95, dec: 89.26, mag: 1.97, category: "Star", typeName: "Star", sizeArcmin: 1 }
 ];
 
 const RAD = Math.PI / 180;
 const DEG = 180 / Math.PI;
+let selectedTargetId = "m31";
 
 function norm(deg) { return (deg % 360 + 360) % 360; }
 
-// Dynamic Solar System Ephemeris Calculator
 function getSolarSystemObjects(now) {
   const d = (now - new Date(Date.UTC(2000, 0, 1, 12, 0, 0))) / 86400000;
   
-  // Sun Position
   const L = norm(280.466 + 0.9856474 * d);
   const g = norm(357.528 + 0.9856003 * d) * RAD;
   const sunEclLng = norm(L + 1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g));
@@ -210,7 +398,6 @@ function getSolarSystemObjects(now) {
   const sunRa = norm(Math.atan2(Math.cos(eps) * Math.sin(sunEclLng * RAD), Math.cos(sunEclLng * RAD)) * DEG);
   const sunDec = Math.asin(Math.sin(eps) * Math.sin(sunEclLng * RAD)) * DEG;
   
-  // Moon Position & Phase Calculation
   const Lm = norm(218.316 + 13.176396 * d);
   const Mm = norm(134.963 + 13.064993 * d) * RAD;
   const F = norm(93.272 + 13.229350 * d) * RAD;
@@ -224,21 +411,22 @@ function getSolarSystemObjects(now) {
   const phaseAngle = norm(moonEclLng - sunEclLng);
   const illuminated = Math.round((1 - Math.cos(phaseAngle * RAD)) / 2 * 100);
 
-  // Approximate Planetary Keplerian Elements
   const planets = [
-    { name: "Mercury", N: 48.33, i: 7.00, w: 29.12, a: 0.387, e: 0.2056, M0: 174.79, n: 4.0923, mag: -0.2 },
-    { name: "Venus", N: 76.68, i: 3.39, w: 54.88, a: 0.723, e: 0.0067, M0: 50.11, n: 1.6021, mag: -4.2 },
-    { name: "Mars", N: 49.56, i: 1.85, w: 286.50, a: 1.524, e: 0.0934, M0: 19.37, n: 0.5240, mag: 0.5 },
-    { name: "Jupiter", N: 100.46, i: 1.30, w: 273.87, a: 5.204, e: 0.0485, M0: 20.02, n: 0.0831, mag: -2.3 },
-    { name: "Saturn", N: 113.67, i: 2.49, w: 339.39, a: 9.582, e: 0.0555, M0: 317.02, n: 0.0335, mag: 0.6 }
+    { id: "mercury", name: "Mercury", N: 48.33, i: 7.00, w: 29.12, a: 0.387, e: 0.2056, M0: 174.79, n: 4.0923, mag: -0.2, sizeArcmin: 0.15 },
+    { id: "venus", name: "Venus", N: 76.68, i: 3.39, w: 54.88, a: 0.723, e: 0.0067, M0: 50.11, n: 1.6021, mag: -4.2, sizeArcmin: 0.4 },
+    { id: "mars", name: "Mars", N: 49.56, i: 1.85, w: 286.50, a: 1.524, e: 0.0934, M0: 19.37, n: 0.5240, mag: 0.5, sizeArcmin: 0.2 },
+    { id: "jupiter", name: "Jupiter", N: 100.46, i: 1.30, w: 273.87, a: 5.204, e: 0.0485, M0: 20.02, n: 0.0831, mag: -2.3, sizeArcmin: 0.75 },
+    { id: "saturn", name: "Saturn", N: 113.67, i: 2.49, w: 339.39, a: 9.582, e: 0.0555, M0: 317.02, n: 0.0335, mag: 0.6, sizeArcmin: 0.3 },
+    { id: "uranus", name: "Uranus", N: 74.01, i: 0.77, w: 96.99, a: 19.191, e: 0.0463, M0: 142.24, n: 0.0117, mag: 5.7, sizeArcmin: 0.06 },
+    { id: "neptune", name: "Neptune", N: 131.78, i: 1.77, w: 273.18, a: 30.07, e: 0.0095, M0: 256.23, n: 0.0059, mag: 7.8, sizeArcmin: 0.04 }
   ];
 
   const earthEclLng = norm(sunEclLng + 180);
-  const R = 1.000; // Earth distance approx
+  const R = 1.000;
 
   const solSysList = [
-    { name: "Sun", ra: sunRa, dec: sunDec, mag: -26.7, category: "SolarSystem", typeName: "Star / Solar", color: "#ffcc00" },
-    { name: `Moon (${illuminated}% Illum)`, ra: moonRa, dec: moonDec, mag: -12.6, category: "SolarSystem", typeName: "Moon", color: "#e6e6e6" }
+    { id: "sun", name: "Sun", ra: sunRa, dec: sunDec, mag: -26.7, category: "SolarSystem", typeName: "Star / Solar", color: "#ffcc00", sizeArcmin: 32 },
+    { id: "moon", name: `Moon (${illuminated}% Illum)`, ra: moonRa, dec: moonDec, mag: -12.6, category: "SolarSystem", typeName: "Moon", color: "#e6e6e6", sizeArcmin: 31 }
   ];
 
   planets.forEach(p => {
@@ -261,13 +449,15 @@ function getSolarSystemObjects(now) {
     const dec = Math.asin(Math.sin(geoLng * RAD) * Math.sin(eps)) * DEG;
 
     solSysList.push({
+      id: p.id,
       name: p.name,
       ra: ra,
       dec: dec,
       mag: p.mag,
       category: "SolarSystem",
       typeName: "Planet",
-      color: "#ffb703"
+      color: "#ffb703",
+      sizeArcmin: p.sizeArcmin
     });
   });
 
@@ -307,12 +497,98 @@ function raDecToAltAz(raDeg, decDeg, latDeg, lngDeg, now) {
   return { alt: alt / RAD, az: (az / RAD + 360) % 360 };
 }
 
+function renderFraming(obj, pos) {
+  const canvas = document.getElementById('fovCanvas');
+  const ctx = canvas.getContext('2d');
+  const width = canvas.width;
+  const height = canvas.height;
+
+  ctx.clearRect(0, 0, width, height);
+
+  ctx.fillStyle = "#ffffff";
+  for(let i = 0; i < 35; i++) {
+    const sx = (Math.sin(i * 99 + obj.ra) * 0.5 + 0.5) * width;
+    const sy = (Math.cos(i * 33 + obj.dec) * 0.5 + 0.5) * height;
+    ctx.globalAlpha = (i % 5 + 1) / 6;
+    ctx.beginPath();
+    ctx.arc(sx, sy, (i % 3 === 0) ? 1.5 : 1, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1.0;
+
+  const dwarfFovArcmin = 84; 
+  const pxPerArcmin = width / dwarfFovArcmin;
+  const targetPx = Math.max(4, obj.sizeArcmin * pxPerArcmin);
+
+  ctx.save();
+  ctx.translate(width / 2, height / 2);
+  
+  if (obj.category === "Galaxy") {
+    ctx.fillStyle = "rgba(100, 200, 255, 0.4)";
+    ctx.strokeStyle = "#00d2ff";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, targetPx / 2, targetPx / 4, Math.PI / 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  } else if (obj.category === "Nebula") {
+    ctx.fillStyle = "rgba(255, 100, 200, 0.35)";
+    ctx.strokeStyle = "#ff64c8";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(0, 0, targetPx / 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  } else if (obj.category === "Cluster") {
+    ctx.fillStyle = "rgba(0, 255, 170, 0.35)";
+    ctx.strokeStyle = "#00ffaa";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(0, 0, targetPx / 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  } else if (obj.category === "SolarSystem") {
+    ctx.fillStyle = obj.color || "#ffb703";
+    ctx.beginPath();
+    ctx.arc(0, 0, Math.min(width/4, Math.max(3, targetPx/2)), 0, Math.PI * 2);
+    ctx.fill();
+  } else {
+    ctx.fillStyle = "#ffffff";
+    ctx.strokeStyle = "#00d2ff";
+    ctx.beginPath();
+    ctx.arc(0, 0, Math.max(2, targetPx / 3), 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+
+  ctx.strokeStyle = "rgba(255, 0, 85, 0.7)";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(10, 10, width - 20, height - 20);
+  
+  ctx.strokeStyle = "rgba(255, 0, 85, 0.3)";
+  ctx.beginPath();
+  ctx.moveTo(width / 2 - 15, height / 2); ctx.lineTo(width / 2 + 15, height / 2);
+  ctx.moveTo(width / 2, height / 2 - 15); ctx.lineTo(width / 2, height / 2 + 15);
+  ctx.stroke();
+
+  document.getElementById('fovTitle').textContent = obj.name;
+  const fitPercentage = Math.round((obj.sizeArcmin / dwarfFovArcmin) * 100);
+  document.getElementById('fovMetrics').innerHTML = `
+    <strong>Type:</strong> ${obj.typeName}<br>
+    <strong>Apparent Size:</strong> ${obj.sizeArcmin}' arcmin<br>
+    <strong>FOV Coverage:</strong> ~${fitPercentage}% of Dwarf Sensor Field<br>
+    <strong>Altitude:</strong> ${pos.alt.toFixed(1)}° | <strong>Azimuth:</strong> ${pos.az.toFixed(1)}°<br>
+    <strong>Est. Stack Time:</strong> ${calcExposure(obj.category, obj.mag)}
+  `;
+}
+
 function render() {
   const lat = parseFloat(document.getElementById('lat').value) || 0;
   const lng = parseFloat(document.getElementById('lng').value) || 0;
   const centerAz = parseFloat(document.getElementById('azimuth').value) || 300;
   const fov = parseFloat(document.getElementById('fov').value) || 90;
   const minAlt = parseFloat(document.getElementById('minAlt').value) || 20;
+  const searchText = (document.getElementById('txtSearch').value || "").toLowerCase().trim();
 
   const showSolar = document.getElementById('chkSolar').checked;
   const showGalaxies = document.getElementById('chkGalaxy').checked;
@@ -335,6 +611,10 @@ function render() {
   const solarSystemObjects = getSolarSystemObjects(now);
   const fullCatalog = [...solarSystemObjects, ...CATALOG_DSO];
 
+  let selectedObjObj = null;
+  let selectedObjPos = null;
+  let visibleCount = 0;
+
   fullCatalog.forEach(obj => {
     if (obj.category === 'SolarSystem' && !showSolar) return;
     if (obj.category === 'Galaxy' && !showGalaxies) return;
@@ -346,48 +626,153 @@ function render() {
     const azDiff = getAzDiff(pos.az, centerAz);
     const inWindow = Math.abs(azDiff) <= fov / 2;
     const isVisible = inWindow && pos.alt >= minAlt;
+    const isSelected = obj.id === selectedTargetId;
+
+    if (isSelected) {
+      selectedObjObj = obj;
+      selectedObjPos = pos;
+    }
 
     if (inWindow) {
       const x = 400 + (azDiff / (fov / 2)) * 400;
       const y = 500 * (1 - (pos.alt / 90));
 
       let dotColor = "#00d2ff";
-      let dotRadius = "7";
-      if (obj.category === 'Star') { dotColor = "#ffffff"; dotRadius = "4"; }
+      let dotRadius = "6";
+      if (obj.category === 'Star') { dotColor = "#ffffff"; dotRadius = "3"; }
+      else if (obj.category === 'Nebula') { dotColor = "#ff64c8"; dotRadius = "6"; }
+      else if (obj.category === 'Cluster') { dotColor = "#00ffaa"; dotRadius = "6"; }
       else if (obj.category === 'SolarSystem') { dotColor = obj.color || "#ffb703"; dotRadius = "8"; }
+
+      const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      group.setAttribute("class", "target-node");
+      group.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectedTargetId = obj.id;
+        render();
+      });
+
+      if (isSelected) {
+        const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        ring.setAttribute("cx", x);
+        ring.setAttribute("cy", y);
+        ring.setAttribute("r", "14");
+        ring.setAttribute("fill", "none");
+        ring.setAttribute("stroke", "#ff0055");
+        ring.setAttribute("stroke-width", "2");
+        ring.setAttribute("stroke-dasharray", "3 2");
+        group.appendChild(ring);
+      }
 
       const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
       circle.setAttribute("cx", x);
       circle.setAttribute("cy", y);
       circle.setAttribute("r", dotRadius);
-      circle.setAttribute("fill", isVisible ? dotColor : "#555555");
-      targetsGroup.appendChild(circle);
+      circle.setAttribute("fill", isVisible ? (isSelected ? "#ff0055" : dotColor) : "#555555");
+      group.appendChild(circle);
 
       const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
       text.setAttribute("x", x + 10);
       text.setAttribute("y", y + 4);
-      text.setAttribute("fill", isVisible ? "#ffffff" : "#777777");
-      text.setAttribute("font-size", "13");
+      text.setAttribute("fill", isSelected ? "#ff0055" : (isVisible ? "#ffffff" : "#777777"));
+      text.setAttribute("font-size", isSelected ? "14" : "11");
+      text.setAttribute("font-weight", isSelected ? "bold" : "normal");
       text.textContent = `${obj.name} (${pos.alt.toFixed(1)}°)`;
-      targetsGroup.appendChild(text);
+      group.appendChild(text);
 
-      if (isVisible && obj.category !== 'Star') {
+      targetsGroup.appendChild(group);
+
+      const matchesSearch = searchText === "" || obj.name.toLowerCase().includes(searchText) || obj.typeName.toLowerCase().includes(searchText) || obj.id.toLowerCase().includes(searchText);
+
+      if (isVisible && obj.category !== 'Star' && matchesSearch) {
+        visibleCount++;
         const card = document.createElement('div');
         const isSolar = obj.category === 'SolarSystem';
-        card.className = `card ${isSolar ? 'solar-sys' : ''}`;
+        const isNebula = obj.category === 'Nebula';
+        const isCluster = obj.category === 'Cluster';
+        
+        let cardTypeClass = '';
+        if (isSolar) cardTypeClass = 'solar-sys';
+        else if (isNebula) cardTypeClass = 'nebula';
+        else if (isCluster) cardTypeClass = 'cluster';
+
+        card.className = `card ${cardTypeClass} ${isSelected ? 'selected' : ''}`;
         card.innerHTML = `
           <strong>${obj.name}</strong><br>
           Type: ${obj.typeName} | Mag: ${obj.mag}<br>
           Alt: ${pos.alt.toFixed(1)}° | Az: ${pos.az.toFixed(1)}°<br>
-          <div class="badge ${isSolar ? 'solar' : ''}">⏱ Est. Dwarf Stack: ${calcExposure(obj.category, obj.mag)}</div>
+          <div class="badge ${isSolar ? 'solar' : ''}">⏱ Est. Stack: ${calcExposure(obj.category, obj.mag)}</div>
         `;
+        card.addEventListener('click', () => {
+          selectedTargetId = obj.id;
+          render();
+        });
         targetList.appendChild(card);
       }
     }
   });
+
+  document.getElementById('visibleCount').textContent = visibleCount;
+
+  if (selectedObjObj && selectedObjPos) {
+    renderFraming(selectedObjObj, selectedObjPos);
+  }
 }
 
-['lat', 'lng', 'azimuth', 'fov', 'minAlt', 'chkSolar', 'chkGalaxy', 'chkNebula', 'chkCluster', 'chkStar'].forEach(id => {
+// Mouse Pan & Zoom Control Logic
+const viewport = document.getElementById('viewport');
+let isDragging = false;
+let startX = 0;
+let startAzimuth = 0;
+
+viewport.addEventListener('mousedown', (e) => {
+  if (e.target.closest('.map-controls')) return;
+  isDragging = true;
+  startX = e.clientX;
+  startAzimuth = parseFloat(document.getElementById('azimuth').value) || 300;
+});
+
+window.addEventListener('mousemove', (e) => {
+  if (!isDragging) return;
+  const dx = e.clientX - startX;
+  const currentFov = parseFloat(document.getElementById('fov').value) || 90;
+  const azDelta = (dx / viewport.clientWidth) * currentFov;
+  let newAz = norm(startAzimuth - azDelta);
+  document.getElementById('azimuth').value = Math.round(newAz);
+  render();
+});
+
+window.addEventListener('mouseup', () => { isDragging = false; });
+
+viewport.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  let fovInput = document.getElementById('fov');
+  let currentFov = parseFloat(fovInput.value) || 90;
+  let delta = e.deltaY > 0 ? 5 : -5;
+  let newFov = Math.min(180, Math.max(20, currentFov + delta));
+  fovInput.value = newFov;
+  render();
+}, { passive: false });
+
+document.getElementById('btnZoomIn').addEventListener('click', () => {
+  let fovInput = document.getElementById('fov');
+  fovInput.value = Math.max(20, (parseFloat(fovInput.value) || 90) - 15);
+  render();
+});
+
+document.getElementById('btnZoomOut').addEventListener('click', () => {
+  let fovInput = document.getElementById('fov');
+  fovInput.value = Math.min(180, (parseFloat(fovInput.value) || 90) + 15);
+  render();
+});
+
+document.getElementById('btnReset').addEventListener('click', () => {
+  document.getElementById('azimuth').value = 300;
+  document.getElementById('fov').value = 90;
+  render();
+});
+
+['lat', 'lng', 'azimuth', 'fov', 'minAlt', 'chkSolar', 'chkGalaxy', 'chkNebula', 'chkCluster', 'chkStar', 'txtSearch'].forEach(id => {
   document.getElementById(id).addEventListener('input', render);
   document.getElementById(id).addEventListener('change', render);
 });
