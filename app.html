@@ -6,10 +6,21 @@
   <title>Dwarf Mini Stargazer - Pro Edition (150+ Objects)</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #070b12;
+      --panel: #0d1420;
+      --panel-2: #101a28;
+      --line: #1b3146;
+      --cyan: #55e7ff;
+      --cyan-soft: #9aeeff;
+      --pink: #ff62c7;
+      --text: #e8f7ff;
+      --muted: #91a8ba;
+    }
     body {
-      font-family: system-ui, -apple-system, sans-serif;
-      background: #0b0e14;
-      color: #e0e6ed;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at 50% 20%, #0d1a29 0%, #070b12 48%, #04070c 100%);
+      color: var(--text);
       display: flex;
       height: 100vh;
       width: 100vw;
@@ -19,19 +30,19 @@
     .panel {
       width: 330px;
       min-width: 330px;
-      background: #151922;
+      background: linear-gradient(180deg, #101927 0%, #0b121d 100%);
       padding: 15px;
       display: flex;
       flex-direction: column;
       gap: 10px;
       overflow-y: auto;
-      border-right: 1px solid #232936;
+      border-right: 1px solid var(--line);
       z-index: 10;
     }
-    .panel-right { border-right: none; border-left: 1px solid #232936; }
+    .panel-right { border-right: none; border-left: 1px solid var(--line); }
     .viewport {
       flex: 1;
-      background: #05070a;
+      background: #04070c;
       display: flex;
       flex-direction: column;
       position: relative;
@@ -42,16 +53,16 @@
     svg {
       width: 100%;
       height: 100%;
-      background: #05070a;
+      background: #04070c;
     }
-    h2 { font-size: 0.95rem; color: #00d2ff; margin-top: 5px; }
-    label { font-size: 0.8rem; color: #8892b0; display: block; margin-top: 4px; }
+    h2 { font-size: 0.95rem; color: var(--cyan); margin-top: 5px; text-transform: uppercase; letter-spacing: 1.2px; }
+    label { font-size: 0.8rem; color: var(--muted); display: block; margin-top: 4px; }
     input[type="number"], input[type="text"] {
       width: 100%;
       padding: 6px 8px;
-      background: #0b0e14;
-      border: 1px solid #232936;
-      color: #00d2ff;
+      background: #09111b;
+      border: 1px solid var(--line);
+      color: var(--cyan);
       font-weight: bold;
       border-radius: 4px;
       margin-top: 2px;
@@ -74,10 +85,10 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      background: #0b0e14;
+      background: #09111b;
       padding: 8px;
       border-radius: 4px;
-      border: 1px solid #232936;
+      border: 1px solid var(--line);
     }
     .filter-item {
       display: flex;
@@ -87,10 +98,10 @@
       color: #e0e6ed;
       cursor: pointer;
     }
-    .filter-item input { accent-color: #00d2ff; cursor: pointer; }
+    .filter-item input { accent-color: var(--cyan); cursor: pointer; }
 
     .card {
-      background: #0b0e14;
+      background: #09111b;
       padding: 10px;
       border-radius: 4px;
       border-left: 3px solid #00d2ff;
@@ -102,7 +113,7 @@
       align-items: center;
       transition: background 0.2s, border-color 0.2s;
     }
-    .card:hover { background: #151922; }
+    .card:hover { background: linear-gradient(180deg, #101927 0%, #0b121d 100%); }
     .card.selected { border-left-color: #ff0055 !important; background: #1c2230; }
     .card.solarsystem { border-left-color: #ffb703; }
     .card.nebula { border-left-color: #ff64c8; }
@@ -112,9 +123,9 @@
       width: 50px;
       height: 50px;
       border-radius: 4px;
-      background: #05070a;
+      background: #04070c;
       object-fit: cover;
-      border: 1px solid #232936;
+      border: 1px solid var(--line);
       flex-shrink: 0;
     }
     
@@ -125,7 +136,7 @@
       margin-top: 4px;
       padding: 2px 6px;
       background: rgba(0,210,255,0.2);
-      color: #00d2ff;
+      color: var(--cyan);
       border-radius: 3px;
       font-size: 0.7rem;
       font-weight: bold;
@@ -133,8 +144,8 @@
 
     /* FOV Inspector & Wiki Container */
     .fov-box {
-      background: #0b0e14;
-      border: 1px solid #232936;
+      background: #09111b;
+      border: 1px solid var(--line);
       border-radius: 6px;
       padding: 10px;
       margin-bottom: 10px;
@@ -163,7 +174,7 @@
       height: 100%;
     }
     .fov-details { font-size: 0.75rem; color: #a0aec0; margin-top: 8px; line-height: 1.4; }
-    .fov-details strong { color: #00d2ff; }
+    .fov-details strong { color: var(--cyan); }
     .wiki-desc {
       font-size: 0.72rem;
       color: #718096;
@@ -172,11 +183,86 @@
       max-height: 55px;
       overflow-y: auto;
     }
-    .wiki-desc a { color: #00d2ff; text-decoration: none; }
+    .wiki-desc a { color: var(--cyan); text-decoration: none; }
     .wiki-desc a:hover { text-decoration: underline; }
 
     .target-node { cursor: pointer; }
+    .target-node text {
+      font-family: "SF Mono", "Roboto Mono", "JetBrains Mono", ui-monospace, monospace;
+      font-size: 10px;
+      font-weight: 650;
+      letter-spacing: 0.25px;
+      paint-order: stroke;
+      stroke: #03070d;
+      stroke-width: 4px;
+      stroke-linejoin: round;
+      dominant-baseline: middle;
+    }
+    .target-node:hover text {
+      font-size: 13px;
+      fill: #ffffff !important;
+    }
     .target-node:hover circle { stroke: #ffffff; stroke-width: 2px; }
+
+    /* Light cyberpunk HUD treatment */
+    .panel {
+      box-shadow: inset -1px 0 rgba(85,231,255,0.05), 8px 0 30px rgba(0,0,0,0.18);
+    }
+    .panel-right {
+      box-shadow: inset 1px 0 rgba(85,231,255,0.05), -8px 0 30px rgba(0,0,0,0.18);
+    }
+    .panel h2::before {
+      content: "▸ ";
+      opacity: 0.8;
+    }
+    .map-btn {
+      backdrop-filter: blur(8px);
+      background: rgba(12,22,34,0.88);
+      border-color: #28506a;
+      box-shadow: 0 0 12px rgba(85,231,255,0.08), 0 8px 18px rgba(0,0,0,0.35);
+    }
+    .map-btn:hover {
+      background: #122638;
+      color: #ffffff;
+      border-color: var(--cyan);
+      box-shadow: 0 0 16px rgba(85,231,255,0.18);
+    }
+    .map-hint {
+      background: rgba(6,12,19,0.78);
+      border-color: #24465d;
+      color: #8eaabd;
+      box-shadow: 0 0 12px rgba(85,231,255,0.04);
+    }
+    input[type="number"], input[type="text"] {
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    input[type="number"]:focus, input[type="text"]:focus {
+      outline: none;
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 2px rgba(85,231,255,0.08), 0 0 14px rgba(85,231,255,0.07);
+    }
+
+    /* Constellation overlay: deliberately subtle and behind all DSO targets */
+    .constellation-line {
+      stroke: #52627a;
+      stroke-width: 1;
+      stroke-opacity: 0.48;
+      fill: none;
+      vector-effect: non-scaling-stroke;
+    }
+    .constellation-name {
+      fill: #7f8ea8;
+      fill-opacity: 0.72;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.6px;
+      text-anchor: middle;
+      dominant-baseline: middle;
+      paint-order: stroke;
+      stroke: #05070a;
+      stroke-width: 3px;
+      stroke-opacity: 0.85;
+    }
 
     /* Map Overlay HUD controls */
     .map-controls {
@@ -191,9 +277,9 @@
     .map-btn {
       width: 32px;
       height: 32px;
-      background: #151922;
-      border: 1px solid #232936;
-      color: #00d2ff;
+      background: linear-gradient(180deg, #101927 0%, #0b121d 100%);
+      border: 1px solid var(--line);
+      color: var(--cyan);
       font-size: 1.1rem;
       font-weight: bold;
       border-radius: 4px;
@@ -201,7 +287,7 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      box-shadow: 0 0 0 1px rgba(85,231,255,0.03), 0 8px 22px rgba(0,0,0,0.35);
     }
     .map-btn:hover { background: #232936; color: #fff; }
     .map-hint {
@@ -214,7 +300,7 @@
       font-size: 0.7rem;
       color: #8892b0;
       pointer-events: none;
-      border: 1px solid #232936;
+      border: 1px solid var(--line);
     }
   </style>
 </head>
@@ -269,13 +355,15 @@
     <div class="map-hint">🖱️ Drag to Pan Azimuth | Scroll Wheel to Zoom FOV</div>
 
     <svg id="sky" viewBox="0 0 800 500" preserveAspectRatio="none">
-      <line x1="0" y1="125" x2="800" y2="125" stroke="#1f293d" stroke-dasharray="4"/>
-      <line x1="0" y1="250" x2="800" y2="250" stroke="#1f293d" stroke-dasharray="4"/>
-      <line x1="400" y1="0" x2="400" y2="500" stroke="#1f293d" stroke-dasharray="4"/>
+      <line x1="0" y1="125" x2="800" y2="125" stroke="#20364a" stroke-dasharray="4"/>
+      <line x1="0" y1="250" x2="800" y2="250" stroke="#20364a" stroke-dasharray="4"/>
+      <line x1="400" y1="0" x2="400" y2="500" stroke="#20364a" stroke-dasharray="4"/>
       
-      <rect id="horizon" x="0" y="388" width="800" height="112" fill="#1c1313"/>
-      <line id="horizonLine" x1="0" y1="388" x2="800" y2="388" stroke="#ff4444" stroke-width="2"/>
+      <rect id="horizon" x="0" y="388" width="800" height="112" fill="#160f16"/>
+      <line id="horizonLine" x1="0" y1="388" x2="800" y2="388" stroke="#ff5577" stroke-width="1.5"/>
       
+      <!-- Constellations are rendered here so they stay behind the DSO targets -->
+      <g id="constellationsGroup" pointer-events="none"></g>
       <g id="targetsGroup"></g>
     </svg>
   </div>
@@ -554,6 +642,139 @@ function raDecToAltAz(raDeg, decDeg, latDeg, lngDeg, now) {
   return { alt: alt / RAD, az: (az / RAD + 360) % 360 };
 }
 
+// ---------------------------------------------------------------------------
+// Constellation overlay
+// Data: D3-Celestial / IAU constellation data, in J2000 equatorial
+// coordinates. GeoJSON longitude is RA in the range -180..180.
+// ---------------------------------------------------------------------------
+let constellationLinesData = null;
+let constellationNamesData = null;
+let constellationsLoading = false;
+
+const CONSTELLATION_LINES_URL =
+  "https://raw.githubusercontent.com/ofrohn/d3-celestial/master/data/constellations.lines.json";
+const CONSTELLATION_NAMES_URL =
+  "https://raw.githubusercontent.com/ofrohn/d3-celestial/master/data/constellations.json";
+
+function constellationLonToRa(lon) {
+  return lon < 0 ? lon + 360 : lon;
+}
+
+function constellationSkyPosition(ra, dec, lat, lng, now, centerAz, fov) {
+  const pos = raDecToAltAz(ra, dec, lat, lng, now);
+  const azDiff = getAzDiff(pos.az, centerAz);
+
+  return {
+    alt: pos.alt,
+    az: pos.az,
+    azDiff: azDiff,
+    x: 400 + (azDiff / (fov / 2)) * 400,
+    y: 500 * (1 - (pos.alt / 90))
+  };
+}
+
+function renderConstellations(lat, lng, now, centerAz, fov, minAlt) {
+  const group = document.getElementById("constellationsGroup");
+  if (!group) return;
+
+  group.innerHTML = "";
+
+  if (!constellationLinesData || !constellationNamesData) return;
+
+  const NS = "http://www.w3.org/2000/svg";
+
+  // Draw the constellation stick figures first.
+  constellationLinesData.features.forEach(feature => {
+    if (!feature.geometry || feature.geometry.type !== "MultiLineString") return;
+
+    feature.geometry.coordinates.forEach(line => {
+      for (let i = 1; i < line.length; i++) {
+        const a = line[i - 1];
+        const b = line[i];
+
+        const pa = constellationSkyPosition(
+          constellationLonToRa(a[0]), a[1],
+          lat, lng, now, centerAz, fov
+        );
+        const pb = constellationSkyPosition(
+          constellationLonToRa(b[0]), b[1],
+          lat, lng, now, centerAz, fov
+        );
+
+        if (pa.alt < minAlt && pb.alt < minAlt) continue;
+        if (Math.abs(pa.azDiff) > fov / 2 && Math.abs(pb.azDiff) > fov / 2) continue;
+
+        // Do not draw a false line across the left/right FOV edge.
+        if (Math.abs(pa.x - pb.x) > 500) continue;
+
+        const segment = document.createElementNS(NS, "line");
+        segment.setAttribute("class", "constellation-line");
+        segment.setAttribute("x1", pa.x);
+        segment.setAttribute("y1", pa.y);
+        segment.setAttribute("x2", pb.x);
+        segment.setAttribute("y2", pb.y);
+        group.appendChild(segment);
+      }
+    });
+  });
+
+  // Draw the IAU constellation names.
+  constellationNamesData.features.forEach(feature => {
+    if (!feature.geometry || feature.geometry.type !== "Point") return;
+
+    const coord = feature.geometry.coordinates;
+    const p = constellationSkyPosition(
+      constellationLonToRa(coord[0]), coord[1],
+      lat, lng, now, centerAz, fov
+    );
+
+    if (p.alt < minAlt || Math.abs(p.azDiff) > fov / 2) return;
+
+    const label = document.createElementNS(NS, "text");
+    label.setAttribute("class", "constellation-name");
+    label.setAttribute("x", p.x);
+    label.setAttribute("y", p.y);
+    label.textContent =
+      (feature.properties && feature.properties.name) || feature.id || "";
+
+    if (feature.properties && String(feature.properties.rank) === "1") {
+      label.setAttribute("font-size", "14");
+    } else if (feature.properties && String(feature.properties.rank) === "3") {
+      label.setAttribute("font-size", "11");
+    }
+
+    group.appendChild(label);
+  });
+}
+
+async function loadConstellations() {
+  if (constellationsLoading || (constellationLinesData && constellationNamesData)) return;
+
+  constellationsLoading = true;
+
+  try {
+    const [linesResponse, namesResponse] = await Promise.all([
+      fetch(CONSTELLATION_LINES_URL),
+      fetch(CONSTELLATION_NAMES_URL)
+    ]);
+
+    if (!linesResponse.ok || !namesResponse.ok) {
+      throw new Error("Unable to load constellation data");
+    }
+
+    constellationLinesData = await linesResponse.json();
+    constellationNamesData = await namesResponse.json();
+
+    // Render again using the current location/time/FOV.
+    render();
+  } catch (err) {
+    // The overlay is optional: never let it break the existing application.
+    console.warn("Constellation overlay unavailable:", err);
+  } finally {
+    constellationsLoading = false;
+  }
+}
+
 async function renderFraming(obj, pos) {
   const canvas = document.getElementById('fovCanvas');
   const wikiImg = document.getElementById('wikiImg');
@@ -638,6 +859,10 @@ function render() {
   targetList.innerHTML = '';
 
   const now = new Date();
+
+  // Constellations are a background layer, before targetsGroup.
+  renderConstellations(lat, lng, now, centerAz, fov, minAlt);
+
   const solarSystemObjects = getSolarSystemObjects(now);
   const fullCatalog = [...solarSystemObjects, ...CATALOG_DSO];
 
@@ -794,6 +1019,9 @@ document.getElementById('btnGps').addEventListener('click', () => {
   }
 });
 
+// Load constellation data independently so a network failure never affects
+// the existing DSO application.
+loadConstellations();
 render();
 </script>
 </body>
