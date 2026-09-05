@@ -6,8 +6,6 @@ A simple standalone app for finding deep sky objects (nebulas, galaxies, ...) fr
 
 This is particulary useful when wanting to observe deep sky objects from an apartment with only windows to watch the sky!
 
-Written for the Dwarf Mini in mind, but can be used with other telescopes.
-
 Features :
 - set a position on Earth, with a azimuth to define which part of the sky is observable,
 - real time computation of sky objects

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
-  <title>Dwarf Mini Stargazer - Pro Edition (150+ Objects)</title>
+  <title>Deep Sky Spot - Pro Edition (150+ Objects)</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -764,7 +764,7 @@ async function fetchWikiData(wikiQuery) {
   }
 }
 
-const DWARF_FOV_ARCMIN = 84;
+const SENSOR_FOV_ARCMIN = 84;
 
 function calcExposureMinutes(category, mag) {
   if (category === "SolarSystem") return 0;
@@ -779,7 +779,7 @@ function calcExposure(category, mag) {
 }
 
 function calcFovCoverage(sizeArcmin) {
-  return Math.round((sizeArcmin / DWARF_FOV_ARCMIN) * 100);
+  return Math.round((sizeArcmin / SENSOR_FOV_ARCMIN) * 100);
 }
 
 function getAzDiff(targetAz, centerAz) {
@@ -1001,7 +1001,7 @@ async function renderFraming(obj, pos) {
   document.getElementById('fovMetrics').innerHTML = `
     <strong>Type:</strong> ${obj.typeName}<br>
     <strong>Apparent Size:</strong> ${obj.sizeArcmin}' arcmin<br>
-    <strong>FOV Coverage:</strong> ~${fitPercentage}% of Dwarf Sensor Field<br>
+    <strong>FOV Coverage:</strong> ~${fitPercentage}% of Sensor Field<br>
     <strong>Altitude:</strong> ${pos.alt.toFixed(1)}° | <strong>Azimuth:</strong> ${pos.az.toFixed(1)}°<br>
     <strong>Est. Stack Time:</strong> ${calcExposure(obj.category, obj.mag)}
   `;
