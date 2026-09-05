@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+``<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
   <title>Dwarf Mini Stargazer - Pro Edition (150+ Objects)</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -23,6 +23,7 @@
       color: var(--text);
       display: flex;
       height: 100vh;
+      height: 100dvh;
       width: 100vw;
       overflow: hidden;
       user-select: none;
@@ -36,6 +37,7 @@
       flex-direction: column;
       gap: 10px;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
       border-right: 1px solid var(--line);
       z-index: 10;
     }
@@ -48,16 +50,82 @@
       position: relative;
       cursor: grab;
       overflow: hidden;
+      touch-action: none;
     }
     .viewport:active { cursor: grabbing; }
     svg {
       width: 100%;
       height: 100%;
       background: #04070c;
+      touch-action: none;
+    }
+
+    /* Mobile / iPad drawer controls (hidden on desktop) */
+    .drawer-toggle { display: none; }
+    .drawer-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(2,4,8,0.55);
+      backdrop-filter: blur(2px);
+      z-index: 90;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    /* Phones, and any touch (coarse pointer) device up to tablet-landscape width */
+    @media (max-width: 900px), (pointer: coarse) and (max-width: 1366px) {
+      .panel {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        width: min(86vw, 340px);
+        min-width: unset;
+        height: 100vh;
+        height: 100dvh;
+        z-index: 100;
+        transition: transform 0.28s ease;
+        box-shadow: 0 0 40px rgba(0,0,0,0.6);
+        padding-top: max(15px, env(safe-area-inset-top));
+        padding-bottom: max(15px, env(safe-area-inset-bottom));
+      }
+      .panel:not(.panel-right) {
+        left: 0;
+        transform: translateX(-100%);
+      }
+      .panel-right {
+        right: 0;
+        left: auto;
+        transform: translateX(100%);
+      }
+      .panel.open { transform: translateX(0); }
+
+      .drawer-toggle {
+        display: flex;
+      }
+      .drawer-backdrop.show {
+        display: block;
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      /* Larger touch targets */
+      .map-btn, .drawer-toggle {
+        width: 44px;
+        height: 44px;
+        font-size: 1.25rem;
+      }
+      .filter-item { padding: 4px 0; font-size: 0.85rem; }
+      button, input[type="number"], input[type="text"], select {
+        padding: 10px 8px;
+        font-size: 0.95rem;
+      }
+      .card { padding: 12px 10px; }
     }
     h2 { font-size: 0.95rem; color: var(--cyan); margin-top: 5px; text-transform: uppercase; letter-spacing: 1.2px; }
     label { font-size: 0.8rem; color: var(--muted); display: block; margin-top: 4px; }
-    input[type="number"], input[type="text"] {
+    input[type="number"], input[type="text"], select {
       width: 100%;
       padding: 6px 8px;
       background: #09111b;
@@ -68,6 +136,12 @@
       margin-top: 2px;
     }
     input[type="text"] { color: #ffffff; font-weight: normal; }
+    select {
+      color: #ffffff;
+      font-weight: normal;
+      cursor: pointer;
+    }
+    select option { background: #09111b; color: #ffffff; }
     button {
       background: #00d2ff;
       color: #000;
@@ -233,10 +307,10 @@
       color: #8eaabd;
       box-shadow: 0 0 12px rgba(85,231,255,0.04);
     }
-    input[type="number"], input[type="text"] {
+    input[type="number"], input[type="text"], select {
       transition: border-color 0.15s, box-shadow 0.15s;
     }
-    input[type="number"]:focus, input[type="text"]:focus {
+    input[type="number"]:focus, input[type="text"]:focus, select:focus {
       outline: none;
       border-color: var(--cyan);
       box-shadow: 0 0 0 2px rgba(85,231,255,0.08), 0 0 14px rgba(85,231,255,0.07);
@@ -248,6 +322,12 @@
       stroke-width: 1;
       stroke-opacity: 0.48;
       fill: none;
+      vector-effect: non-scaling-stroke;
+    }
+    .constellation-star {
+      fill: #cfe8ff;
+      fill-opacity: 0.55;
+      stroke: none;
       vector-effect: non-scaling-stroke;
     }
     .constellation-name {
@@ -302,17 +382,37 @@
       pointer-events: none;
       border: 1px solid var(--line);
     }
+
+    .mobile-controls {
+      display: none;
+      position: absolute;
+      top: max(15px, env(safe-area-inset-top));
+      left: 15px;
+      right: 15px;
+      z-index: 20;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+    .mobile-controls .drawer-toggle { pointer-events: auto; }
+
+    @media (max-width: 900px), (pointer: coarse) and (max-width: 1366px) {
+      .mobile-controls { display: flex; }
+      .map-controls { top: 70px; }
+      .map-hint { display: none; }
+    }
   </style>
 </head>
 <body>
 
-  <div class="panel">
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+
+  <div class="panel" id="leftPanel">
     <h2>Observer Location</h2>
     <button id="btnGps">Detect GPS Location</button>
     
     <label for="lat">Latitude (°)</label>
     <input type="number" id="lat" value="38.1157" step="0.0001">
-    
+
     <label for="lng">Longitude (°)</label>
     <input type="number" id="lng" value="13.3613" step="0.0001">
 
@@ -347,6 +447,10 @@
   </div>
 
   <div class="viewport" id="viewport">
+    <div class="mobile-controls">
+      <div class="map-btn drawer-toggle" id="btnToggleLeft" title="Observer & Window Settings">☰</div>
+      <div class="map-btn drawer-toggle" id="btnToggleRight" title="Target List & Framing">🔭</div>
+    </div>
     <div class="map-controls">
       <div class="map-btn" id="btnZoomIn" title="Zoom In (+)">+</div>
       <div class="map-btn" id="btnZoomOut" title="Zoom Out (−)">−</div>
@@ -368,7 +472,7 @@
     </svg>
   </div>
 
-  <div class="panel panel-right">
+  <div class="panel panel-right" id="rightPanel">
     <h2>Sensor Framing & Wikipedia</h2>
     <div class="fov-box">
       <div id="fovTitle" style="font-weight: bold; color: #ff0055;">Select a target</div>
@@ -384,6 +488,14 @@
 
     <h2>Visible Objects (<span id="visibleCount">0</span>)</h2>
     <input type="text" id="txtSearch" placeholder="Search 150+ targets (M, NGC, IC, Planets)...">
+    <label for="sortBy">Sort By</label>
+    <select id="sortBy">
+      <option value="default">Sky Position (Default)</option>
+      <option value="fov_desc">FOV Coverage: High → Low</option>
+      <option value="fov_asc">FOV Coverage: Low → High</option>
+      <option value="time_asc">Stack Time: Fast → Slow</option>
+      <option value="time_desc">Stack Time: Slow → Fast</option>
+    </select>
     <div id="targetList" style="margin-top: 8px;"></div>
   </div>
 
@@ -441,6 +553,15 @@ const CATALOG_DSO = [
   { id: "ngc5907", name: "NGC 5907 Splinter Galaxy", wikiQuery: "NGC_5907", ra: 229.00, dec: 56.33, mag: 10.3, category: "Galaxy", typeName: "Edge-On Spiral", sizeArcmin: 12.8 },
   { id: "ngc6946", name: "NGC 6946 Fireworks Galaxy", wikiQuery: "NGC_6946", ra: 308.71, dec: 60.15, mag: 9.6, category: "Galaxy", typeName: "Intermediate Spiral", sizeArcmin: 11.5 },
   { id: "ngc7331", name: "NGC 7331 Deer Lick Group", wikiQuery: "NGC_7331", ra: 339.27, dec: 34.42, mag: 9.5, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 10.5 },
+  { id: "ngc5128", name: "NGC 5128 Centaurus A", wikiQuery: "Centaurus_A", ra: 201.37, dec: -43.02, mag: 6.8, category: "Galaxy", typeName: "Peculiar Galaxy", sizeArcmin: 25.7 },
+  { id: "ngc6822", name: "NGC 6822 Barnard's Galaxy", wikiQuery: "Barnard%27s_Galaxy", ra: 296.23, dec: -14.80, mag: 9.3, category: "Galaxy", typeName: "Dwarf Irregular", sizeArcmin: 15.5 },
+  { id: "ngc1365", name: "NGC 1365 Great Barred Spiral", wikiQuery: "NGC_1365", ra: 53.40, dec: -36.13, mag: 9.6, category: "Galaxy", typeName: "Barred Spiral", sizeArcmin: 11.2 },
+  { id: "ngc55", name: "NGC 55 Sculptor Galaxy Group", wikiQuery: "NGC_55", ra: 3.72, dec: -39.18, mag: 7.9, category: "Galaxy", typeName: "Barred Irregular", sizeArcmin: 32.4 },
+  { id: "ngc300", name: "NGC 300 Spiral Galaxy", wikiQuery: "NGC_300", ra: 13.73, dec: -37.68, mag: 8.1, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 21.9 },
+  { id: "ic342", name: "IC 342 Hidden Galaxy", wikiQuery: "IC_342", ra: 56.70, dec: 68.10, mag: 9.1, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 21.4 },
+  { id: "ngc4038", name: "NGC 4038/4039 Antennae Galaxies", wikiQuery: "Antennae_Galaxies", ra: 180.47, dec: -18.87, mag: 10.3, category: "Galaxy", typeName: "Colliding Spirals", sizeArcmin: 5 },
+  { id: "lmc", name: "Large Magellanic Cloud", wikiQuery: "Large_Magellanic_Cloud", ra: 80.89, dec: -69.75, mag: 0.9, category: "Galaxy", typeName: "Dwarf Irregular", sizeArcmin: 650 },
+  { id: "smc", name: "Small Magellanic Cloud", wikiQuery: "Small_Magellanic_Cloud", ra: 13.16, dec: -72.80, mag: 2.7, category: "Galaxy", typeName: "Dwarf Irregular", sizeArcmin: 320 },
 
   // --- NEBULAE ---
   { id: "m1", name: "M1 Crab Nebula", wikiQuery: "Crab_Nebula", ra: 83.63, dec: 22.01, mag: 8.4, category: "Nebula", typeName: "Supernova Remnant", sizeArcmin: 6 },
@@ -476,6 +597,25 @@ const CATALOG_DSO = [
   { id: "ngc7635", name: "NGC 7635 Bubble Nebula", wikiQuery: "Bubble_Nebula_(NGC_7635)", ra: 350.21, dec: 61.20, mag: 10.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 15 },
   { id: "ngc7023", name: "NGC 7023 Iris Nebula", wikiQuery: "Iris_Nebula", ra: 315.37, dec: 68.16, mag: 6.8, category: "Nebula", typeName: "Reflection Nebula", sizeArcmin: 18 },
   { id: "sh2_155", name: "Sh2-155 Cave Nebula", wikiQuery: "Cave_Nebula", ra: 344.30, dec: 62.62, mag: 7.7, category: "Nebula", typeName: "Emission / Dark", sizeArcmin: 50 },
+  { id: "ngc6543", name: "NGC 6543 Cat's Eye Nebula", wikiQuery: "Cat%27s_Eye_Nebula", ra: 269.64, dec: 66.63, mag: 8.1, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.3 },
+  { id: "ngc3242", name: "NGC 3242 Ghost of Jupiter", wikiQuery: "Ghost_of_Jupiter", ra: 156.19, dec: -18.63, mag: 7.8, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.7 },
+  { id: "ngc7009", name: "NGC 7009 Saturn Nebula", wikiQuery: "Saturn_Nebula", ra: 316.05, dec: -11.36, mag: 8.0, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.5 },
+  { id: "ngc6302", name: "NGC 6302 Bug Nebula", wikiQuery: "Bug_Nebula", ra: 258.43, dec: -37.10, mag: 9.6, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.8 },
+  { id: "ic63", name: "IC 63 Ghost Nebula", wikiQuery: "IC_63", ra: 14.75, dec: 60.88, mag: 10.0, category: "Nebula", typeName: "Emission / Reflection", sizeArcmin: 20 },
+  { id: "sh2_101", name: "Sh2-101 Tulip Nebula", wikiQuery: "Sharpless_2-101", ra: 300.90, dec: 35.75, mag: 9.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 25 },
+  { id: "ngc2070", name: "NGC 2070 Tarantula Nebula", wikiQuery: "Tarantula_Nebula", ra: 84.66, dec: -69.10, mag: 8.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 40 },
+  { id: "ngc3372", name: "NGC 3372 Carina Nebula", wikiQuery: "Carina_Nebula", ra: 161.28, dec: -59.87, mag: 3.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 120 },
+  { id: "ic2944", name: "IC 2944 Running Chicken Nebula", wikiQuery: "Running_Chicken_Nebula", ra: 174.20, dec: -63.03, mag: 4.5, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 70 },
+  { id: "ngc6334", name: "NGC 6334 Cat's Paw Nebula", wikiQuery: "Cat%27s_Paw_Nebula", ra: 260.19, dec: -35.97, mag: 8.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 40 },
+  { id: "ngc6357", name: "NGC 6357 War and Peace Nebula", wikiQuery: "War_and_Peace_Nebula", ra: 261.19, dec: -34.20, mag: 8.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 25 },
+  { id: "ic2118", name: "IC 2118 Witch Head Nebula", wikiQuery: "Witch_Head_Nebula", ra: 76.05, dec: -7.22, mag: 13.0, category: "Nebula", typeName: "Reflection Nebula", sizeArcmin: 180 },
+  { id: "ic5146", name: "IC 5146 Cocoon Nebula", wikiQuery: "Cocoon_Nebula", ra: 328.35, dec: 47.27, mag: 10.0, category: "Nebula", typeName: "Emission / Reflection", sizeArcmin: 12 },
+  { id: "ngc7380", name: "NGC 7380 Wizard Nebula", wikiQuery: "Wizard_Nebula", ra: 341.83, dec: 58.12, mag: 7.2, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 25 },
+  { id: "ic443", name: "IC 443 Jellyfish Nebula", wikiQuery: "Jellyfish_Nebula", ra: 94.30, dec: 22.52, mag: 12.0, category: "Nebula", typeName: "Supernova Remnant", sizeArcmin: 50 },
+  { id: "ngc2174", name: "NGC 2174 Monkey Head Nebula", wikiQuery: "Monkey_Head_Nebula", ra: 92.43, dec: 20.50, mag: 6.8, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 40 },
+  { id: "ngc2264", name: "NGC 2264 Cone Nebula / Christmas Tree", wikiQuery: "Cone_Nebula", ra: 100.25, dec: 9.88, mag: 3.9, category: "Nebula", typeName: "Emission Nebula / Cluster", sizeArcmin: 20 },
+  { id: "ic2177", name: "IC 2177 Seagull Nebula", wikiQuery: "Seagull_Nebula", ra: 106.25, dec: -10.70, mag: 7.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 120 },
+  { id: "ngc3576", name: "NGC 3576 Statue of Liberty Nebula", wikiQuery: "NGC_3576", ra: 167.98, dec: -61.30, mag: 9.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 30 },
 
   // --- STAR CLUSTERS ---
   { id: "m2", name: "M2 Globular Cluster", wikiQuery: "Messier_2", ra: 323.36, dec: -0.82, mag: 6.3, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 16 },
@@ -536,6 +676,14 @@ const CATALOG_DSO = [
   { id: "ngc884", name: "NGC 884 Double Cluster East", wikiQuery: "Double_Cluster", ra: 35.61, dec: 57.15, mag: 3.8, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 30 },
   { id: "ngc457", name: "NGC 457 Dragonfly / Owl Cluster", wikiQuery: "NGC_457", ra: 19.80, dec: 58.33, mag: 6.4, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 13 },
   { id: "ngc7789", name: "NGC 7789 Caroline's Rose", wikiQuery: "NGC_7789", ra: 359.32, dec: 56.72, mag: 6.7, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 16 },
+  { id: "ngc104", name: "NGC 104 47 Tucanae", wikiQuery: "47_Tucanae", ra: 6.02, dec: -72.08, mag: 4.1, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 31 },
+  { id: "ngc5139", name: "NGC 5139 Omega Centauri", wikiQuery: "Omega_Centauri", ra: 201.70, dec: -47.48, mag: 3.9, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 36.3 },
+  { id: "ngc4755", name: "NGC 4755 Jewel Box Cluster", wikiQuery: "Jewel_Box_(astronomy)", ra: 193.40, dec: -60.37, mag: 4.2, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 10 },
+  { id: "ngc6231", name: "NGC 6231 Northern Jewel Box", wikiQuery: "NGC_6231", ra: 253.54, dec: -41.83, mag: 2.6, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 15 },
+  { id: "ngc3532", name: "NGC 3532 Wishing Well Cluster", wikiQuery: "NGC_3532", ra: 166.40, dec: -58.73, mag: 3.0, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 55 },
+  { id: "ngc6752", name: "NGC 6752 Globular Cluster", wikiQuery: "NGC_6752", ra: 287.72, dec: -59.98, mag: 5.4, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 20.4 },
+  { id: "cr399", name: "Collinder 399 Coathanger Cluster", wikiQuery: "Brocchi%27s_Cluster", ra: 291.35, dec: 20.18, mag: 3.6, category: "Cluster", typeName: "Asterism", sizeArcmin: 60 },
+  { id: "ngc2477", name: "NGC 2477 Open Cluster", wikiQuery: "NGC_2477", ra: 118.05, dec: -38.53, mag: 5.8, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 27 },
 
   // --- BRIGHT STARS & ALIGNMENT TARGETS ---
   { id: "sirius", name: "Sirius (Canis Major)", wikiQuery: "Sirius", ra: 101.29, dec: -16.72, mag: -1.46, category: "Star", typeName: "Star", sizeArcmin: 1 },
@@ -616,11 +764,22 @@ async function fetchWikiData(wikiQuery) {
   }
 }
 
+const DWARF_FOV_ARCMIN = 84;
+
+function calcExposureMinutes(category, mag) {
+  if (category === "SolarSystem") return 0;
+  let base = category === "Cluster" ? 3 : (category === "Galaxy" ? 15 : 10);
+  return Math.min(60, Math.max(2, Math.round(base * Math.pow(1.35, Math.max(0, mag - 4)))));
+}
+
 function calcExposure(category, mag) {
   if (category === "SolarSystem") return "Instant / Solar Filter";
-  let base = category === "Cluster" ? 3 : (category === "Galaxy" ? 15 : 10);
-  const mins = Math.min(60, Math.max(2, Math.round(base * Math.pow(1.35, Math.max(0, mag - 4)))));
+  const mins = calcExposureMinutes(category, mag);
   return mins < 60 ? `${mins} mins` : "1 hr+";
+}
+
+function calcFovCoverage(sizeArcmin) {
+  return Math.round((sizeArcmin / DWARF_FOV_ARCMIN) * 100);
 }
 
 function getAzDiff(targetAz, centerAz) {
@@ -718,6 +877,34 @@ function renderConstellations(lat, lng, now, centerAz, fov, minAlt) {
     });
   });
 
+  // Draw a faint, semi-transparent star marker at every constellation vertex
+  // (the actual named stars used to build the stick figures), deduplicated
+  // so shared vertices between segments don't stack multiple dots.
+  const drawnStars = new Set();
+  constellationLinesData.features.forEach(feature => {
+    if (!feature.geometry || feature.geometry.type !== "MultiLineString") return;
+
+    feature.geometry.coordinates.forEach(line => {
+      line.forEach(point => {
+        const ra = constellationLonToRa(point[0]);
+        const dec = point[1];
+        const key = `${ra.toFixed(2)},${dec.toFixed(2)}`;
+        if (drawnStars.has(key)) return;
+        drawnStars.add(key);
+
+        const p = constellationSkyPosition(ra, dec, lat, lng, now, centerAz, fov);
+        if (p.alt < minAlt || Math.abs(p.azDiff) > fov / 2) return;
+
+        const star = document.createElementNS(NS, "circle");
+        star.setAttribute("class", "constellation-star");
+        star.setAttribute("cx", p.x);
+        star.setAttribute("cy", p.y);
+        star.setAttribute("r", "1.7");
+        group.appendChild(star);
+      });
+    });
+  });
+
   // Draw the IAU constellation names.
   constellationNamesData.features.forEach(feature => {
     if (!feature.geometry || feature.geometry.type !== "Point") return;
@@ -810,8 +997,7 @@ async function renderFraming(obj, pos) {
     wikiSummary.innerHTML = "";
   }
 
-  const dwarfFovArcmin = 84; 
-  const fitPercentage = Math.round((obj.sizeArcmin / dwarfFovArcmin) * 100);
+  const fitPercentage = calcFovCoverage(obj.sizeArcmin);
   document.getElementById('fovMetrics').innerHTML = `
     <strong>Type:</strong> ${obj.typeName}<br>
     <strong>Apparent Size:</strong> ${obj.sizeArcmin}' arcmin<br>
@@ -822,7 +1008,7 @@ async function renderFraming(obj, pos) {
 }
 
 async function renderListThumbnails(visibleObjects) {
-  for (const obj of visibleObjects) {
+  for (const { obj } of visibleObjects) {
     const thumbElem = document.getElementById(`thumb-${obj.id}`);
     if (thumbElem && obj.wikiQuery) {
       const wikiData = await fetchWikiData(obj.wikiQuery);
@@ -933,25 +1119,40 @@ function render() {
 
       if (isVisible && obj.category !== 'Star' && matchesSearch) {
         visibleCount++;
-        visibleObjectsList.push(obj);
-        
-        const card = document.createElement('div');
-        card.className = `card ${obj.category.toLowerCase()} ${isSelected ? 'selected' : ''}`;
-        card.innerHTML = `
-          <img id="thumb-${obj.id}" class="card-thumb" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='50' height='50'><rect width='50' height='50' fill='%2305070a'/></svg>" alt="Preview">
-          <div class="card-info">
-            <strong>${obj.name}</strong><br>
-            Mag: ${obj.mag} | Alt: ${pos.alt.toFixed(1)}°<br>
-            <div class="badge">⏱ ${calcExposure(obj.category, obj.mag)}</div>
-          </div>
-        `;
-        card.addEventListener('click', () => {
-          selectedTargetId = obj.id;
-          render();
-        });
-        targetList.appendChild(card);
+        visibleObjectsList.push({ obj, pos });
       }
     }
+  });
+
+  const sortBy = document.getElementById('sortBy').value;
+  visibleObjectsList.sort((a, b) => {
+    switch (sortBy) {
+      case 'fov_desc': return calcFovCoverage(b.obj.sizeArcmin) - calcFovCoverage(a.obj.sizeArcmin);
+      case 'fov_asc': return calcFovCoverage(a.obj.sizeArcmin) - calcFovCoverage(b.obj.sizeArcmin);
+      case 'time_asc': return calcExposureMinutes(a.obj.category, a.obj.mag) - calcExposureMinutes(b.obj.category, b.obj.mag);
+      case 'time_desc': return calcExposureMinutes(b.obj.category, b.obj.mag) - calcExposureMinutes(a.obj.category, a.obj.mag);
+      default: return 0;
+    }
+  });
+
+  visibleObjectsList.forEach(({ obj, pos }) => {
+    const isSelected = obj.id === selectedTargetId;
+    const card = document.createElement('div');
+    card.className = `card ${obj.category.toLowerCase()} ${isSelected ? 'selected' : ''}`;
+    card.innerHTML = `
+      <img id="thumb-${obj.id}" class="card-thumb" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='50' height='50'><rect width='50' height='50' fill='%2305070a'/></svg>" alt="Preview">
+      <div class="card-info">
+        <strong>${obj.name}</strong><br>
+        Mag: ${obj.mag} | Alt: ${pos.alt.toFixed(1)}°<br>
+        <span class="badge">⏱ ${calcExposure(obj.category, obj.mag)}</span>
+        <span class="badge" style="margin-left: 4px;">🔭 ${calcFovCoverage(obj.sizeArcmin)}% FOV</span>
+      </div>
+    `;
+    card.addEventListener('click', () => {
+      selectedTargetId = obj.id;
+      render();
+    });
+    targetList.appendChild(card);
   });
 
   document.getElementById('visibleCount').textContent = visibleCount;
@@ -959,9 +1160,31 @@ function render() {
   if (selectedObjObj && selectedObjPos) {
     renderFraming(selectedObjObj, selectedObjPos);
   }
-  
+
   renderListThumbnails(visibleObjectsList);
 }
+
+// Mobile / iPad drawer controls
+const leftPanel = document.getElementById('leftPanel');
+const rightPanel = document.getElementById('rightPanel');
+const drawerBackdrop = document.getElementById('drawerBackdrop');
+
+function closeMobileDrawers() {
+  leftPanel.classList.remove('open');
+  rightPanel.classList.remove('open');
+  drawerBackdrop.classList.remove('show');
+}
+function toggleDrawer(panel) {
+  const wasOpen = panel.classList.contains('open');
+  closeMobileDrawers();
+  if (!wasOpen) {
+    panel.classList.add('open');
+    drawerBackdrop.classList.add('show');
+  }
+}
+document.getElementById('btnToggleLeft').addEventListener('click', () => toggleDrawer(leftPanel));
+document.getElementById('btnToggleRight').addEventListener('click', () => toggleDrawer(rightPanel));
+drawerBackdrop.addEventListener('click', closeMobileDrawers);
 
 // Mouse Navigation Controls
 const viewport = document.getElementById('viewport');
@@ -990,6 +1213,57 @@ viewport.addEventListener('wheel', (e) => {
   render();
 }, { passive: false });
 
+// Touch Navigation: one-finger drag to pan azimuth, two-finger pinch to zoom FOV
+let touchMode = null; // 'pan' | 'pinch' | null
+let touchStartX = 0, pinchStartDist = 0, pinchStartFov = 90;
+
+function touchDistance(t1, t2) {
+  return Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+}
+
+viewport.addEventListener('touchstart', (e) => {
+  if (e.target.closest('.map-controls') || e.target.closest('.mobile-controls')) return;
+  if (e.touches.length === 1) {
+    touchMode = 'pan';
+    touchStartX = e.touches[0].clientX;
+    startAzimuth = parseFloat(document.getElementById('azimuth').value) || 300;
+  } else if (e.touches.length === 2) {
+    touchMode = 'pinch';
+    pinchStartDist = touchDistance(e.touches[0], e.touches[1]);
+    pinchStartFov = parseFloat(document.getElementById('fov').value) || 90;
+  }
+}, { passive: true });
+
+viewport.addEventListener('touchmove', (e) => {
+  if (touchMode === 'pan' && e.touches.length === 1) {
+    e.preventDefault();
+    const dx = e.touches[0].clientX - touchStartX;
+    const currentFov = parseFloat(document.getElementById('fov').value) || 90;
+    document.getElementById('azimuth').value = Math.round(norm(startAzimuth - (dx / viewport.clientWidth) * currentFov));
+    render();
+  } else if (touchMode === 'pinch' && e.touches.length === 2) {
+    e.preventDefault();
+    const dist = touchDistance(e.touches[0], e.touches[1]);
+    if (dist > 0 && pinchStartDist > 0) {
+      const fovInput = document.getElementById('fov');
+      fovInput.value = Math.round(Math.min(180, Math.max(20, pinchStartFov * (pinchStartDist / dist))));
+      render();
+    }
+  }
+}, { passive: false });
+
+viewport.addEventListener('touchend', (e) => {
+  if (e.touches.length === 1) {
+    touchMode = 'pan';
+    touchStartX = e.touches[0].clientX;
+    startAzimuth = parseFloat(document.getElementById('azimuth').value) || 300;
+  } else if (e.touches.length === 0) {
+    touchMode = null;
+  }
+}, { passive: true });
+
+viewport.addEventListener('touchcancel', () => { touchMode = null; }, { passive: true });
+
 document.getElementById('btnZoomIn').addEventListener('click', () => {
   document.getElementById('fov').value = Math.max(20, (parseFloat(document.getElementById('fov').value) || 90) - 15);
   render();
@@ -1004,7 +1278,7 @@ document.getElementById('btnReset').addEventListener('click', () => {
   render();
 });
 
-['lat', 'lng', 'azimuth', 'fov', 'minAlt', 'chkSolar', 'chkGalaxy', 'chkNebula', 'chkCluster', 'chkStar', 'txtSearch'].forEach(id => {
+['lat', 'lng', 'azimuth', 'fov', 'minAlt', 'chkSolar', 'chkGalaxy', 'chkNebula', 'chkCluster', 'chkStar', 'txtSearch', 'sortBy'].forEach(id => {
   document.getElementById(id).addEventListener('input', render);
   document.getElementById(id).addEventListener('change', render);
 });
