@@ -215,6 +215,8 @@
       font-size: 0.7rem;
       font-weight: bold;
     }
+    .badge-dualband { background: rgba(255,98,199,0.2); color: var(--pink); }
+    .badge-broadband { background: rgba(0,255,170,0.18); color: #00ffaa; }
 
     /* FOV Inspector & Wiki Container */
     .fov-box {
@@ -554,7 +556,7 @@ const CATALOG_DSO = [
   { id: "ngc6946", name: "NGC 6946 Fireworks Galaxy", wikiQuery: "NGC_6946", ra: 308.71, dec: 60.15, mag: 9.6, category: "Galaxy", typeName: "Intermediate Spiral", sizeArcmin: 11.5 },
   { id: "ngc7331", name: "NGC 7331 Deer Lick Group", wikiQuery: "NGC_7331", ra: 339.27, dec: 34.42, mag: 9.5, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 10.5 },
   { id: "ngc5128", name: "NGC 5128 Centaurus A", wikiQuery: "Centaurus_A", ra: 201.37, dec: -43.02, mag: 6.8, category: "Galaxy", typeName: "Peculiar Galaxy", sizeArcmin: 25.7 },
-  { id: "ngc6822", name: "NGC 6822 Barnard's Galaxy", wikiQuery: "Barnard%27s_Galaxy", ra: 296.23, dec: -14.80, mag: 9.3, category: "Galaxy", typeName: "Dwarf Irregular", sizeArcmin: 15.5 },
+  { id: "ngc6822", name: "NGC 6822 Barnard's Galaxy", wikiQuery: "Barnard's_Galaxy", ra: 296.23, dec: -14.80, mag: 9.3, category: "Galaxy", typeName: "Dwarf Irregular", sizeArcmin: 15.5 },
   { id: "ngc1365", name: "NGC 1365 Great Barred Spiral", wikiQuery: "NGC_1365", ra: 53.40, dec: -36.13, mag: 9.6, category: "Galaxy", typeName: "Barred Spiral", sizeArcmin: 11.2 },
   { id: "ngc55", name: "NGC 55 Sculptor Galaxy Group", wikiQuery: "NGC_55", ra: 3.72, dec: -39.18, mag: 7.9, category: "Galaxy", typeName: "Barred Irregular", sizeArcmin: 32.4 },
   { id: "ngc300", name: "NGC 300 Spiral Galaxy", wikiQuery: "NGC_300", ra: 13.73, dec: -37.68, mag: 8.1, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 21.9 },
@@ -571,7 +573,7 @@ const CATALOG_DSO = [
   { id: "m20", name: "M20 Trifid Nebula", wikiQuery: "Trifid_Nebula", ra: 270.63, dec: -23.03, mag: 6.3, category: "Nebula", typeName: "Emission / Reflection", sizeArcmin: 28 },
   { id: "m27", name: "M27 Dumbbell Nebula", wikiQuery: "Dumbbell_Nebula", ra: 299.90, dec: 22.72, mag: 7.5, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 8 },
   { id: "m42", name: "M42 Orion Nebula", wikiQuery: "Orion_Nebula", ra: 83.82, dec: -5.39, mag: 4.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 65 },
-  { id: "m43", name: "M43 De Mairan's Nebula", wikiQuery: "De_Mairan%27s_Nebula", ra: 83.89, dec: -5.27, mag: 9.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 20 },
+  { id: "m43", name: "M43 De Mairan's Nebula", wikiQuery: "De_Mairan's_Nebula", ra: 83.89, dec: -5.27, mag: 9.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 20 },
   { id: "m57", name: "M57 Ring Nebula", wikiQuery: "Ring_Nebula", ra: 283.40, dec: 33.03, mag: 8.8, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 2.5 },
   { id: "m76", name: "M76 Little Dumbbell", wikiQuery: "Little_Dumbbell_Nebula", ra: 25.60, dec: 51.58, mag: 10.1, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 2.7 },
   { id: "m78", name: "M78 Reflection Nebula", wikiQuery: "Messier_78", ra: 86.67, dec: 0.08, mag: 8.3, category: "Nebula", typeName: "Reflection Nebula", sizeArcmin: 8 },
@@ -579,14 +581,14 @@ const CATALOG_DSO = [
   { id: "ic405", name: "IC 405 Flaming Star Nebula", wikiQuery: "IC_405", ra: 79.12, dec: 34.35, mag: 6.0, category: "Nebula", typeName: "Emission / Reflection", sizeArcmin: 30 },
   { id: "ic410", name: "IC 410 Tadpoles Nebula", wikiQuery: "IC_410", ra: 80.62, dec: 33.50, mag: 10.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 40 },
   { id: "ic434", name: "IC 434 Horsehead Nebula", wikiQuery: "Horsehead_Nebula", ra: 85.24, dec: -2.46, mag: 7.3, category: "Nebula", typeName: "Dark / Emission", sizeArcmin: 60 },
-  { id: "ic1396", name: "IC 1396 Elephant's Trunk", wikiQuery: "Elephant%27s_Trunk_Nebula", ra: 324.00, dec: 57.50, mag: 3.5, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 170 },
+  { id: "ic1396", name: "IC 1396 Elephant's Trunk", wikiQuery: "Elephant's_Trunk_Nebula", ra: 324.00, dec: 57.50, mag: 3.5, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 170 },
   { id: "ic1805", name: "IC 1805 Heart Nebula", wikiQuery: "Heart_Nebula", ra: 38.20, dec: 61.45, mag: 6.5, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 150 },
   { id: "ic1848", name: "IC 1848 Soul Nebula", wikiQuery: "Soul_Nebula", ra: 44.00, dec: 60.40, mag: 6.5, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 150 },
   { id: "ic5070", name: "IC 5070 Pelican Nebula", wikiQuery: "Pelican_Nebula", ra: 312.70, dec: 44.36, mag: 8.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 60 },
   { id: "ngc1499", name: "NGC 1499 California Nebula", wikiQuery: "California_Nebula", ra: 60.83, dec: 36.62, mag: 6.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 160 },
   { id: "ngc2024", name: "NGC 2024 Flame Nebula", wikiQuery: "Flame_Nebula", ra: 85.43, dec: -1.86, mag: 2.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 30 },
   { id: "ngc2237", name: "NGC 2237 Rosette Nebula", wikiQuery: "Rosette_Nebula", ra: 97.98, dec: 4.99, mag: 9.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 80 },
-  { id: "ngc2359", name: "NGC 2359 Thor's Helmet", wikiQuery: "Thor%27s_Helmet", ra: 109.63, dec: -13.20, mag: 11.4, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 8 },
+  { id: "ngc2359", name: "NGC 2359 Thor's Helmet", wikiQuery: "Thor's_Helmet", ra: 109.63, dec: -13.20, mag: 11.4, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 8 },
   { id: "ngc2392", name: "NGC 2392 Eskimo Nebula", wikiQuery: "Eskimo_Nebula", ra: 112.28, dec: 20.91, mag: 9.1, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.8 },
   { id: "ngc281", name: "NGC 281 Pacman Nebula", wikiQuery: "NGC_281", ra: 13.20, dec: 56.62, mag: 7.4, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 35 },
   { id: "ngc6888", name: "NGC 6888 Crescent Nebula", wikiQuery: "Crescent_Nebula", ra: 303.02, dec: 38.35, mag: 7.4, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 18 },
@@ -597,7 +599,7 @@ const CATALOG_DSO = [
   { id: "ngc7635", name: "NGC 7635 Bubble Nebula", wikiQuery: "Bubble_Nebula_(NGC_7635)", ra: 350.21, dec: 61.20, mag: 10.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 15 },
   { id: "ngc7023", name: "NGC 7023 Iris Nebula", wikiQuery: "Iris_Nebula", ra: 315.37, dec: 68.16, mag: 6.8, category: "Nebula", typeName: "Reflection Nebula", sizeArcmin: 18 },
   { id: "sh2_155", name: "Sh2-155 Cave Nebula", wikiQuery: "Cave_Nebula", ra: 344.30, dec: 62.62, mag: 7.7, category: "Nebula", typeName: "Emission / Dark", sizeArcmin: 50 },
-  { id: "ngc6543", name: "NGC 6543 Cat's Eye Nebula", wikiQuery: "Cat%27s_Eye_Nebula", ra: 269.64, dec: 66.63, mag: 8.1, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.3 },
+  { id: "ngc6543", name: "NGC 6543 Cat's Eye Nebula", wikiQuery: "Cat's_Eye_Nebula", ra: 269.64, dec: 66.63, mag: 8.1, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.3 },
   { id: "ngc3242", name: "NGC 3242 Ghost of Jupiter", wikiQuery: "Ghost_of_Jupiter", ra: 156.19, dec: -18.63, mag: 7.8, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.7 },
   { id: "ngc7009", name: "NGC 7009 Saturn Nebula", wikiQuery: "Saturn_Nebula", ra: 316.05, dec: -11.36, mag: 8.0, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.5 },
   { id: "ngc6302", name: "NGC 6302 Bug Nebula", wikiQuery: "Bug_Nebula", ra: 258.43, dec: -37.10, mag: 9.6, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.8 },
@@ -606,7 +608,7 @@ const CATALOG_DSO = [
   { id: "ngc2070", name: "NGC 2070 Tarantula Nebula", wikiQuery: "Tarantula_Nebula", ra: 84.66, dec: -69.10, mag: 8.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 40 },
   { id: "ngc3372", name: "NGC 3372 Carina Nebula", wikiQuery: "Carina_Nebula", ra: 161.28, dec: -59.87, mag: 3.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 120 },
   { id: "ic2944", name: "IC 2944 Running Chicken Nebula", wikiQuery: "Running_Chicken_Nebula", ra: 174.20, dec: -63.03, mag: 4.5, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 70 },
-  { id: "ngc6334", name: "NGC 6334 Cat's Paw Nebula", wikiQuery: "Cat%27s_Paw_Nebula", ra: 260.19, dec: -35.97, mag: 8.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 40 },
+  { id: "ngc6334", name: "NGC 6334 Cat's Paw Nebula", wikiQuery: "Cat's_Paw_Nebula", ra: 260.19, dec: -35.97, mag: 8.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 40 },
   { id: "ngc6357", name: "NGC 6357 War and Peace Nebula", wikiQuery: "War_and_Peace_Nebula", ra: 261.19, dec: -34.20, mag: 8.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 25 },
   { id: "ic2118", name: "IC 2118 Witch Head Nebula", wikiQuery: "Witch_Head_Nebula", ra: 76.05, dec: -7.22, mag: 13.0, category: "Nebula", typeName: "Reflection Nebula", sizeArcmin: 180 },
   { id: "ic5146", name: "IC 5146 Cocoon Nebula", wikiQuery: "Cocoon_Nebula", ra: 328.35, dec: 47.27, mag: 10.0, category: "Nebula", typeName: "Emission / Reflection", sizeArcmin: 12 },
@@ -623,7 +625,7 @@ const CATALOG_DSO = [
   { id: "m4", name: "M4 Globular Cluster", wikiQuery: "Messier_4", ra: 245.90, dec: -26.53, mag: 5.9, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 26 },
   { id: "m5", name: "M5 Globular Cluster", wikiQuery: "Messier_5", ra: 229.64, dec: 2.08, mag: 5.6, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 23 },
   { id: "m6", name: "M6 Butterfly Cluster", wikiQuery: "Butterfly_Cluster", ra: 260.00, dec: -32.22, mag: 4.2, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 25 },
-  { id: "m7", name: "M7 Ptolemy's Cluster", wikiQuery: "Ptolemy%27s_Cluster", ra: 268.46, dec: -34.82, mag: 3.3, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 80 },
+  { id: "m7", name: "M7 Ptolemy's Cluster", wikiQuery: "Ptolemy's_Cluster", ra: 268.46, dec: -34.82, mag: 3.3, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 80 },
   { id: "m9", name: "M9 Globular Cluster", wikiQuery: "Messier_9", ra: 259.80, dec: -18.52, mag: 7.7, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 12 },
   { id: "m10", name: "M10 Globular Cluster", wikiQuery: "Messier_10", ra: 254.29, dec: -4.10, mag: 6.4, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 20 },
   { id: "m11", name: "M11 Wild Duck Cluster", wikiQuery: "Wild_Duck_Cluster", ra: 277.72, dec: -6.27, mag: 6.3, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 14 },
@@ -682,7 +684,7 @@ const CATALOG_DSO = [
   { id: "ngc6231", name: "NGC 6231 Northern Jewel Box", wikiQuery: "NGC_6231", ra: 253.54, dec: -41.83, mag: 2.6, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 15 },
   { id: "ngc3532", name: "NGC 3532 Wishing Well Cluster", wikiQuery: "NGC_3532", ra: 166.40, dec: -58.73, mag: 3.0, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 55 },
   { id: "ngc6752", name: "NGC 6752 Globular Cluster", wikiQuery: "NGC_6752", ra: 287.72, dec: -59.98, mag: 5.4, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 20.4 },
-  { id: "cr399", name: "Collinder 399 Coathanger Cluster", wikiQuery: "Brocchi%27s_Cluster", ra: 291.35, dec: 20.18, mag: 3.6, category: "Cluster", typeName: "Asterism", sizeArcmin: 60 },
+  { id: "cr399", name: "Collinder 399 Coathanger Cluster", wikiQuery: "Brocchi's_Cluster", ra: 291.35, dec: 20.18, mag: 3.6, category: "Cluster", typeName: "Asterism", sizeArcmin: 60 },
   { id: "ngc2477", name: "NGC 2477 Open Cluster", wikiQuery: "NGC_2477", ra: 118.05, dec: -38.53, mag: 5.8, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 27 },
 
   // --- BRIGHT STARS & ALIGNMENT TARGETS ---
@@ -780,6 +782,27 @@ function calcExposure(category, mag) {
 
 function calcFovCoverage(sizeArcmin) {
   return Math.round((sizeArcmin / SENSOR_FOV_ARCMIN) * 100);
+}
+
+function calcFilterRecommendation(obj) {
+  if (obj.category === "SolarSystem") {
+    return { label: "Broadband / No Filter", cls: "badge-broadband", icon: "🌈" };
+  }
+  if (obj.category === "Nebula") {
+    const t = obj.typeName.toLowerCase();
+    // Emission-line nebulae (incl. planetary nebulae & supernova remnants) glow
+    // strongly in Hydrogen-alpha / OIII, so a dual-band filter cuts light
+    // pollution while passing most of the object's own light through.
+    if (t.includes("emission") || t.includes("planetary") || t.includes("supernova")) {
+      return { label: "Dual-Band (Ha/OIII)", cls: "badge-dualband", icon: "🎯" };
+    }
+    // Pure reflection/dark nebulae are broadband continuum sources: a
+    // narrowband filter would block most of their (and the field's) light.
+    return { label: "Broadband / No Filter", cls: "badge-broadband", icon: "🌈" };
+  }
+  // Galaxies, clusters, and reference stars are broadband continuum
+  // sources - a dual-band filter would starve them of most of their light.
+  return { label: "Broadband / No Filter", cls: "badge-broadband", icon: "🌈" };
 }
 
 function getAzDiff(targetAz, centerAz) {
@@ -998,12 +1021,14 @@ async function renderFraming(obj, pos) {
   }
 
   const fitPercentage = calcFovCoverage(obj.sizeArcmin);
+  const filterRec = calcFilterRecommendation(obj);
   document.getElementById('fovMetrics').innerHTML = `
     <strong>Type:</strong> ${obj.typeName}<br>
     <strong>Apparent Size:</strong> ${obj.sizeArcmin}' arcmin<br>
     <strong>FOV Coverage:</strong> ~${fitPercentage}% of Sensor Field<br>
     <strong>Altitude:</strong> ${pos.alt.toFixed(1)}° | <strong>Azimuth:</strong> ${pos.az.toFixed(1)}°<br>
-    <strong>Est. Stack Time:</strong> ${calcExposure(obj.category, obj.mag)}
+    <strong>Est. Stack Time:</strong> ${calcExposure(obj.category, obj.mag)}<br>
+    <strong>Recommended Filter:</strong> ${filterRec.icon} ${filterRec.label}
   `;
 }
 
@@ -1137,6 +1162,7 @@ function render() {
 
   visibleObjectsList.forEach(({ obj, pos }) => {
     const isSelected = obj.id === selectedTargetId;
+    const filterRec = calcFilterRecommendation(obj);
     const card = document.createElement('div');
     card.className = `card ${obj.category.toLowerCase()} ${isSelected ? 'selected' : ''}`;
     card.innerHTML = `
@@ -1146,6 +1172,7 @@ function render() {
         Mag: ${obj.mag} | Alt: ${pos.alt.toFixed(1)}°<br>
         <span class="badge">⏱ ${calcExposure(obj.category, obj.mag)}</span>
         <span class="badge" style="margin-left: 4px;">🔭 ${calcFovCoverage(obj.sizeArcmin)}% FOV</span>
+        <span class="badge ${filterRec.cls}" style="margin-left: 4px;">${filterRec.icon} ${filterRec.label}</span>
       </div>
     `;
     card.addEventListener('click', () => {
