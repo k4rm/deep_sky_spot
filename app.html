@@ -1387,6 +1387,7 @@ function render() {
       group.addEventListener('click', (e) => {
         e.stopPropagation();
         selectedTargetId = obj.id;
+        openRightPanelOnMobile();
         render();
       });
 
@@ -1505,6 +1506,21 @@ function toggleDrawer(panel) {
 document.getElementById('btnToggleLeft').addEventListener('click', () => toggleDrawer(leftPanel));
 document.getElementById('btnToggleRight').addEventListener('click', () => toggleDrawer(rightPanel));
 drawerBackdrop.addEventListener('click', closeMobileDrawers);
+
+// Same breakpoint as the CSS drawer layout (phones, and any coarse-pointer
+// device up to tablet-landscape width, e.g. iPad).
+const mobileDrawerQuery = window.matchMedia('(max-width: 900px), (pointer: coarse) and (max-width: 1366px)');
+
+// Tapping a target dot on the map selects it, but on iPad/mobile the
+// Sensor Framing & Wikipedia panel with its details lives in the
+// right-hand drawer, off-screen by default -- open it so the tap
+// actually shows something instead of appearing to do nothing.
+function openRightPanelOnMobile() {
+  if (!mobileDrawerQuery.matches) return;
+  closeMobileDrawers();
+  rightPanel.classList.add('open');
+  drawerBackdrop.classList.add('show');
+}
 
 // Mouse Navigation Controls
 const viewport = document.getElementById('viewport');
