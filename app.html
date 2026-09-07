@@ -50,6 +50,7 @@
       z-index: 10;
     }
     .panel-right { border-right: none; border-left: 1px solid var(--line); }
+    #leftPanel { width: 248px; min-width: 248px; }
     .viewport {
       flex: 1;
       background: #04070c;
@@ -84,7 +85,7 @@
 
     /* Phones, and any touch (coarse pointer) device up to tablet-landscape width */
     @media (max-width: 900px), (pointer: coarse) and (max-width: 1366px) {
-      .panel {
+      .panel, #leftPanel {
         position: fixed;
         top: 0;
         bottom: 0;
