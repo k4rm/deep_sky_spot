@@ -12,7 +12,7 @@ This is particularly useful when wanting to observe deep sky objects from an apa
 ## Features
 
 - Set your position on Earth (manually, or via "Detect GPS Location"), a facing azimuth, a minimum horizon altitude, and a field of view to define exactly which slice of the sky is observable from where you're standing.
-- Real-time sky map of 200+ objects: the full solar system (Sun, Moon, planets) plus galaxies, nebulae, and star clusters, all with live altitude/azimuth.
+- Real-time sky map of 350+ objects: the full solar system (Sun, Moon, planets) plus galaxies, nebulae, and star clusters, all with live altitude/azimuth.
 - Background constellation overlay: stick figures, IAU names, and faint stars, layered behind the targets.
 - Search the visible-object list, and sort it by sky position, FOV coverage, or estimated stack time.
 - Per-target FOV coverage %, estimated stacking/exposure time, and a recommended filter (dual-band Ha/OIII for emission-type nebulae, broadband/no filter otherwise).
