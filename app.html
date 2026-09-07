@@ -265,7 +265,7 @@
     .target-node { cursor: pointer; }
     .target-node text {
       font-family: "SF Mono", "Roboto Mono", "JetBrains Mono", ui-monospace, monospace;
-      font-size: 10px;
+      font-size: 12px;
       font-weight: 650;
       letter-spacing: 0.25px;
       paint-order: stroke;
@@ -274,10 +274,12 @@
       stroke-linejoin: round;
       dominant-baseline: middle;
     }
+    .target-node.selected text { font-size: 15px; }
     .target-node:hover text {
-      font-size: 13px;
+      font-size: 15px;
       fill: #ffffff !important;
     }
+    .target-node.selected:hover text { font-size: 16px; }
     .target-node:hover circle { stroke: #ffffff; stroke-width: 2px; }
 
     /* Light cyberpunk HUD treatment */
@@ -488,8 +490,11 @@
       <div class="wiki-desc" id="wikiSummary"></div>
     </div>
 
-    <h2>Visible Objects (<span id="visibleCount">0</span>)</h2>
+    <h2 id="objectsListHeading">Visible Objects (<span id="visibleCount">0</span>)</h2>
     <input type="text" id="txtSearch" placeholder="Search 350+ targets (M, NGC, IC, Planets)...">
+    <label class="filter-item" style="margin-top: 6px;">
+      <input type="checkbox" id="chkGlobalSearch"> Search all targets (ignore current view)
+    </label>
     <label for="sortBy">Sort By</label>
     <select id="sortBy">
       <option value="default">Sky Position (Default)</option>
@@ -1276,6 +1281,7 @@ function render() {
   const fov = parseFloat(document.getElementById('fov').value) || 90;
   const minAlt = parseFloat(document.getElementById('minAlt').value) || 20;
   const searchText = (document.getElementById('txtSearch').value || "").toLowerCase().trim();
+  const globalSearch = document.getElementById('chkGlobalSearch').checked && searchText !== "";
 
   const showSolar = document.getElementById('chkSolar').checked;
   const showGalaxies = document.getElementById('chkGalaxy').checked;
@@ -1353,7 +1359,7 @@ function render() {
       else if (obj.category === 'SolarSystem') dotColor = obj.color || "#ffb703";
 
       const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
-      group.setAttribute("class", "target-node");
+      group.setAttribute("class", `target-node${isSelected ? ' selected' : ''}`);
       // Counter-scale the local subspace so children (drawn around local
       // origin 0,0 below) render at a constant real-pixel size, undistorted
       // by the SVG's independent x/y stretch factors.
@@ -1382,18 +1388,24 @@ function render() {
       const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
       text.setAttribute("x", 10); text.setAttribute("y", 4);
       text.setAttribute("fill", isSelected ? "#ff0055" : (isVisible ? "#ffffff" : "#777777"));
-      text.setAttribute("font-size", isSelected ? "14" : "11");
       text.textContent = `${obj.name} (${pos.alt.toFixed(1)}°)`;
       group.appendChild(text);
 
       targetsGroup.appendChild(group);
+    }
 
-      const matchesSearch = searchText === "" || obj.name.toLowerCase().includes(searchText) || obj.typeName.toLowerCase().includes(searchText);
+    const matchesSearch = searchText === "" || obj.name.toLowerCase().includes(searchText) || obj.typeName.toLowerCase().includes(searchText);
+    // Normally only objects currently visible in the framed window are
+    // listed. With "search all targets" on, a non-empty search instead
+    // lists every catalog match regardless of the current view, so you
+    // can find and select something that isn't framed right now.
+    const includeInList = globalSearch
+      ? (matchesSearch && obj.category !== 'Star')
+      : (inWindow && isVisible && obj.category !== 'Star' && matchesSearch);
 
-      if (isVisible && obj.category !== 'Star' && matchesSearch) {
-        visibleCount++;
-        visibleObjectsList.push({ obj, pos });
-      }
+    if (includeInList) {
+      visibleCount++;
+      visibleObjectsList.push({ obj, pos, inWindow: inWindow && isVisible });
     }
   });
 
@@ -1408,7 +1420,7 @@ function render() {
     }
   });
 
-  visibleObjectsList.forEach(({ obj, pos }) => {
+  visibleObjectsList.forEach(({ obj, pos, inWindow }) => {
     const isSelected = obj.id === selectedTargetId;
     const filterRec = calcFilterRecommendation(obj);
     const card = document.createElement('div');
@@ -1421,15 +1433,20 @@ function render() {
         <span class="badge">⏱ ${calcExposure(obj.category, obj.mag)}</span>
         <span class="badge" style="margin-left: 4px;">🔭 ${calcFovCoverage(obj.sizeArcmin)}% FOV</span>
         <span class="badge ${filterRec.cls}" style="margin-left: 4px;">${filterRec.icon} ${filterRec.label}</span>
+        ${!inWindow ? `<span class="badge" style="margin-left: 4px; background: rgba(255,183,3,0.18); color: #ffb703;">⟲ Not in view</span>` : ''}
       </div>
     `;
     card.addEventListener('click', () => {
       selectedTargetId = obj.id;
+      // A global-search result found outside the current framing: pan
+      // to it so it actually shows up on the map, same as a direct link.
+      if (!inWindow) document.getElementById('azimuth').value = Math.round(norm(pos.az));
       render();
     });
     targetList.appendChild(card);
   });
 
+  document.getElementById('objectsListHeading').firstChild.textContent = globalSearch ? "Search Results (" : "Visible Objects (";
   document.getElementById('visibleCount').textContent = visibleCount;
 
   if (selectedObjObj && selectedObjPos) {
@@ -1553,7 +1570,7 @@ document.getElementById('btnReset').addEventListener('click', () => {
   render();
 });
 
-['lat', 'lng', 'azimuth', 'fov', 'minAlt', 'chkSolar', 'chkGalaxy', 'chkNebula', 'chkCluster', 'chkStar', 'txtSearch', 'sortBy'].forEach(id => {
+['lat', 'lng', 'azimuth', 'fov', 'minAlt', 'chkSolar', 'chkGalaxy', 'chkNebula', 'chkCluster', 'chkStar', 'txtSearch', 'sortBy', 'chkGlobalSearch'].forEach(id => {
   document.getElementById(id).addEventListener('input', render);
   document.getElementById(id).addEventListener('change', render);
 });
