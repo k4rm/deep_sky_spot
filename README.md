@@ -30,4 +30,8 @@ It's a single static HTML file with no build step and no backend - open `app.htm
 - Object previews and summaries: the [Wikipedia REST API](https://en.wikipedia.org/api/rest_v1/).
 - Constellation lines and names: [d3-celestial](https://github.com/ofrohn/d3-celestial).
 
+## License
+
+[MIT](LICENSE)
+
 Enjoy!
