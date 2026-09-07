@@ -3,10 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
   <title>Deep Sky Spot</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
+      /* This app is dark-only by design. Declaring that natively (also
+         mirrored by the <meta name="color-scheme"> tag) tells the browser
+         and dark-mode extensions like Dark Reader the page already handles
+         dark mode itself, so they back off instead of re-theming text with
+         heuristics tuned for light pages -- which otherwise made text look
+         bold/blurry here. */
+      color-scheme: dark;
       --bg: #070b12;
       --panel: #0d1420;
       --panel-2: #101a28;
