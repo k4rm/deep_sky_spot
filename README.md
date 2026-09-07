@@ -19,7 +19,7 @@ This is particularly useful when wanting to observe deep sky objects from an apa
 - Preview image and summary for each object, pulled live from Wikipedia, with a link to the full article.
 - Filter by object type: solar system, galaxies, nebulae, clusters, reference stars.
 - Touch-friendly on mobile and iPad: drag to pan the view, pinch to zoom the field of view, and slide-in panels for settings and the object list.
-- Deep-link straight to an object: append it to the app URL and the view pans and selects it automatically, e.g. [`app.html?Venus`](https://k4rm.github.io/deep_sky_spot/app.html?Venus) or [`app.html?M51`](https://k4rm.github.io/deep_sky_spot/app.html?M51) (a `#hash`, or a `?dso=`/`?target=` query param, also work). Matches by catalog ID or object name.
+- Deep-link straight to an object: append it to the app URL and the view pans and selects it automatically, e.g. [`app.html?Venus`](https://k4rm.github.io/deep_sky_spot/app.html?Venus) or [`app.html?M51`](https://k4rm.github.io/deep_sky_spot/app.html?M51) (a `#hash`, or a `?dso=`/`?target=`/`?t=` query param, also work). Matches by catalog ID or object name.
 
 ## Running it
 

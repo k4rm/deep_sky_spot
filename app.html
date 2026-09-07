@@ -1002,7 +1002,7 @@ function raDecToAltAz(raDeg, decDeg, latDeg, lngDeg, now) {
 
 // ---------------------------------------------------------------------------
 // Direct-link DSO lookup: appending a target to the app URL (as a hash, e.g.
-// app.html#m31, a bare query app.html?venus, or a ?dso=/?target= query
+// app.html#m31, a bare query app.html?venus, or a ?dso=/?target=/?t= query
 // param) selects it on load and pans the view to it, so a link can point
 // straight at one object.
 // ---------------------------------------------------------------------------
@@ -1028,7 +1028,7 @@ function findDsoByQuery(rawQuery) {
 function applyDsoFromUrl() {
   const hashQuery = (location.hash || '').replace(/^#/, '');
   const params = new URLSearchParams(location.search);
-  let query = hashQuery || params.get('dso') || params.get('target');
+  let query = hashQuery || params.get('dso') || params.get('target') || params.get('t');
 
   if (!query && location.search.length > 1) {
     // Bare query with no key, e.g. "?Venus" or "?M51 Whirlpool Galaxy"
