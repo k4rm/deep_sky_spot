@@ -825,6 +825,53 @@ function raDecToAltAz(raDeg, decDeg, latDeg, lngDeg, now) {
 }
 
 // ---------------------------------------------------------------------------
+// Direct-link DSO lookup: appending a target to the app URL (as a hash, e.g.
+// app.html#m31, a bare query app.html?venus, or a ?dso=/?target= query
+// param) selects it on load and pans the view to it, so a link can point
+// straight at one object.
+// ---------------------------------------------------------------------------
+function findDsoByQuery(rawQuery) {
+  if (!rawQuery) return null;
+  let q;
+  try { q = decodeURIComponent(rawQuery).trim().toLowerCase(); }
+  catch (e) { q = rawQuery.trim().toLowerCase(); }
+  if (!q) return null;
+
+  const catalog = [...getSolarSystemObjects(new Date()), ...CATALOG_DSO];
+  const compact = s => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const qCompact = compact(q);
+
+  return catalog.find(o => o.id.toLowerCase() === q)
+    || catalog.find(o => compact(o.id) === qCompact)
+    || catalog.find(o => o.name.toLowerCase() === q)
+    || catalog.find(o => o.name.toLowerCase().startsWith(q))
+    || catalog.find(o => compact(o.name).includes(qCompact))
+    || null;
+}
+
+function applyDsoFromUrl() {
+  const hashQuery = (location.hash || '').replace(/^#/, '');
+  const params = new URLSearchParams(location.search);
+  let query = hashQuery || params.get('dso') || params.get('target');
+
+  if (!query && location.search.length > 1) {
+    // Bare query with no key, e.g. "?Venus" or "?M51 Whirlpool Galaxy"
+    // (URLSearchParams would otherwise treat "Venus" as an empty-valued key).
+    query = location.search.slice(1).split('&')[0].split('=')[0].replace(/\+/g, ' ');
+  }
+
+  const match = findDsoByQuery(query);
+  if (!match) return;
+
+  selectedTargetId = match.id;
+
+  const lat = parseFloat(document.getElementById('lat').value) || 0;
+  const lng = parseFloat(document.getElementById('lng').value) || 0;
+  const pos = raDecToAltAz(match.ra, match.dec, lat, lng, new Date());
+  document.getElementById('azimuth').value = Math.round(norm(pos.az));
+}
+
+// ---------------------------------------------------------------------------
 // Constellation overlay
 // Data: D3-Celestial / IAU constellation data, in J2000 equatorial
 // coordinates. GeoJSON longitude is RA in the range -180..180.
@@ -1322,6 +1369,7 @@ document.getElementById('btnGps').addEventListener('click', () => {
 
 // Load constellation data independently so a network failure never affects
 // the existing DSO application.
+applyDsoFromUrl();
 loadConstellations();
 render();
 </script>
