@@ -274,7 +274,7 @@
       stroke-linejoin: round;
       dominant-baseline: middle;
     }
-    .target-node.selected text { font-size: 15px; }
+    .target-node.selected text, .target-node.search-match text { font-size: 15px; }
     .target-node:hover text {
       font-size: 15px;
       fill: #ffffff !important;
@@ -1342,6 +1342,8 @@ function render() {
     const inWindow = Math.abs(azDiff) <= fov / 2;
     const isVisible = inWindow && pos.alt >= minAlt;
     const isSelected = obj.id === selectedTargetId;
+    const matchesSearch = searchText === "" || obj.name.toLowerCase().includes(searchText) || obj.typeName.toLowerCase().includes(searchText);
+    const searchActive = searchText !== "";
 
     if (isSelected) {
       selectedObjObj = obj;
@@ -1365,7 +1367,15 @@ function render() {
       // by the SVG's independent x/y stretch factors.
       group.setAttribute("transform", `translate(${x}, ${y}) scale(${1 / skyScaleX}, ${1 / skyScaleY})`);
       const isFaint = obj.mag >= faintMagThreshold && obj.category !== 'SolarSystem';
-      if (isFaint && !isSelected) group.setAttribute("opacity", "0.4");
+      if (searchActive) {
+        // While searching, fade out everything that doesn't match so the
+        // match(es) stay easy to spot among 350+ possible targets — and
+        // never fade an actual match, even one that's normally in the
+        // faint bucket, so it stays fully visible.
+        if (!matchesSearch && !isSelected) group.setAttribute("opacity", "0.12");
+      } else if (isFaint && !isSelected) {
+        group.setAttribute("opacity", "0.4");
+      }
       group.addEventListener('click', (e) => {
         e.stopPropagation();
         selectedTargetId = obj.id;
@@ -1378,6 +1388,14 @@ function render() {
         ring.setAttribute("fill", "none"); ring.setAttribute("stroke", "#ff0055");
         ring.setAttribute("stroke-width", "2"); ring.setAttribute("stroke-dasharray", "3 2");
         group.appendChild(ring);
+      } else if (searchActive && matchesSearch) {
+        // Highlight every search match with a bright ring so it pops out
+        // of a crowded sky, even ones the user isn't clicking right now.
+        const searchRing = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        searchRing.setAttribute("cx", 0); searchRing.setAttribute("cy", 0); searchRing.setAttribute("r", "11");
+        searchRing.setAttribute("fill", "none"); searchRing.setAttribute("stroke", "#ffe066");
+        searchRing.setAttribute("stroke-width", "2");
+        group.appendChild(searchRing);
       }
 
       const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
@@ -1385,16 +1403,18 @@ function render() {
       circle.setAttribute("fill", isVisible ? (isSelected ? "#ff0055" : dotColor) : "#555555");
       group.appendChild(circle);
 
+      const isSearchMatch = searchActive && matchesSearch && !isSelected;
+      if (isSearchMatch) group.setAttribute("class", `target-node search-match`);
+
       const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
       text.setAttribute("x", 10); text.setAttribute("y", 4);
-      text.setAttribute("fill", isSelected ? "#ff0055" : (isVisible ? "#ffffff" : "#777777"));
+      text.setAttribute("fill", isSelected ? "#ff0055" : isSearchMatch ? "#ffe066" : (isVisible ? "#ffffff" : "#777777"));
       text.textContent = `${obj.name} (${pos.alt.toFixed(1)}°)`;
       group.appendChild(text);
 
       targetsGroup.appendChild(group);
     }
 
-    const matchesSearch = searchText === "" || obj.name.toLowerCase().includes(searchText) || obj.typeName.toLowerCase().includes(searchText);
     // Normally only objects currently visible in the framed window are
     // listed. With "search all targets" on, a non-empty search instead
     // lists every catalog match regardless of the current view, so you
