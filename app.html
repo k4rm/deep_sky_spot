@@ -902,7 +902,7 @@ function constellationSkyPosition(ra, dec, lat, lng, now, centerAz, fov) {
   };
 }
 
-function renderConstellations(lat, lng, now, centerAz, fov, minAlt) {
+function renderConstellations(lat, lng, now, centerAz, fov, minAlt, skyScaleX, skyScaleY) {
   const group = document.getElementById("constellationsGroup");
   if (!group) return;
 
@@ -911,6 +911,8 @@ function renderConstellations(lat, lng, now, centerAz, fov, minAlt) {
   if (!constellationLinesData || !constellationNamesData) return;
 
   const NS = "http://www.w3.org/2000/svg";
+  const sx = skyScaleX > 0 ? skyScaleX : 1;
+  const sy = skyScaleY > 0 ? skyScaleY : 1;
 
   // Draw the constellation stick figures first.
   constellationLinesData.features.forEach(feature => {
@@ -967,8 +969,12 @@ function renderConstellations(lat, lng, now, centerAz, fov, minAlt) {
 
         const star = document.createElementNS(NS, "circle");
         star.setAttribute("class", "constellation-star");
-        star.setAttribute("cx", p.x);
-        star.setAttribute("cy", p.y);
+        // Counter-scale locally so the marker stays a constant, undistorted
+        // real-pixel size regardless of the SVG's independent x/y stretch
+        // (see the matching target-node transform for the same technique).
+        star.setAttribute("transform", `translate(${p.x}, ${p.y}) scale(${1 / sx}, ${1 / sy})`);
+        star.setAttribute("cx", 0);
+        star.setAttribute("cy", 0);
         star.setAttribute("r", "1.7");
         group.appendChild(star);
       });
@@ -989,8 +995,9 @@ function renderConstellations(lat, lng, now, centerAz, fov, minAlt) {
 
     const label = document.createElementNS(NS, "text");
     label.setAttribute("class", "constellation-name");
-    label.setAttribute("x", p.x);
-    label.setAttribute("y", p.y);
+    label.setAttribute("transform", `translate(${p.x}, ${p.y}) scale(${1 / sx}, ${1 / sy})`);
+    label.setAttribute("x", 0);
+    label.setAttribute("y", 0);
     label.textContent =
       (feature.properties && feature.properties.name) || feature.id || "";
 
@@ -1116,10 +1123,21 @@ function render() {
   targetsGroup.innerHTML = '';
   targetList.innerHTML = '';
 
+  // The SVG stretches its 800x500 viewBox to fill the viewport with
+  // preserveAspectRatio="none" (so the full azimuth/altitude window always
+  // fills the pane), which scales x and y independently. Target dots/text
+  // are positioned in that stretched space but drawn in a locally
+  // counter-scaled subspace (see target-node transform below) so their
+  // size stays a constant, undistorted number of real screen pixels no
+  // matter how the window is resized.
+  const skyRect = document.getElementById('sky').getBoundingClientRect();
+  const skyScaleX = skyRect.width > 0 ? skyRect.width / 800 : 1;
+  const skyScaleY = skyRect.height > 0 ? skyRect.height / 500 : 1;
+
   const now = new Date();
 
   // Constellations are a background layer, before targetsGroup.
-  renderConstellations(lat, lng, now, centerAz, fov, minAlt);
+  renderConstellations(lat, lng, now, centerAz, fov, minAlt, skyScaleX, skyScaleY);
 
   const solarSystemObjects = getSolarSystemObjects(now);
   const fullCatalog = [...solarSystemObjects, ...CATALOG_DSO];
@@ -1159,6 +1177,10 @@ function render() {
 
       const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
       group.setAttribute("class", "target-node");
+      // Counter-scale the local subspace so children (drawn around local
+      // origin 0,0 below) render at a constant real-pixel size, undistorted
+      // by the SVG's independent x/y stretch factors.
+      group.setAttribute("transform", `translate(${x}, ${y}) scale(${1 / skyScaleX}, ${1 / skyScaleY})`);
       group.addEventListener('click', (e) => {
         e.stopPropagation();
         selectedTargetId = obj.id;
@@ -1167,19 +1189,19 @@ function render() {
 
       if (isSelected) {
         const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        ring.setAttribute("cx", x); ring.setAttribute("cy", y); ring.setAttribute("r", "14");
+        ring.setAttribute("cx", 0); ring.setAttribute("cy", 0); ring.setAttribute("r", "14");
         ring.setAttribute("fill", "none"); ring.setAttribute("stroke", "#ff0055");
         ring.setAttribute("stroke-width", "2"); ring.setAttribute("stroke-dasharray", "3 2");
         group.appendChild(ring);
       }
 
       const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-      circle.setAttribute("cx", x); circle.setAttribute("cy", y); circle.setAttribute("r", "6");
+      circle.setAttribute("cx", 0); circle.setAttribute("cy", 0); circle.setAttribute("r", "6");
       circle.setAttribute("fill", isVisible ? (isSelected ? "#ff0055" : dotColor) : "#555555");
       group.appendChild(circle);
 
       const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      text.setAttribute("x", x + 10); text.setAttribute("y", y + 4);
+      text.setAttribute("x", 10); text.setAttribute("y", 4);
       text.setAttribute("fill", isSelected ? "#ff0055" : (isVisible ? "#ffffff" : "#777777"));
       text.setAttribute("font-size", isSelected ? "14" : "11");
       text.textContent = `${obj.name} (${pos.alt.toFixed(1)}°)`;
@@ -1366,6 +1388,20 @@ document.getElementById('btnGps').addEventListener('click', () => {
     });
   }
 });
+
+// Re-render on any size change to the sky pane (window resize, panel
+// drawer open/close, orientation change) so target-node transforms are
+// recomputed against the current pixel size — otherwise their on-screen
+// text/dot size would drift out of sync as the SVG's viewBox stretch
+// factor changes underneath them.
+let skyResizeFrame = null;
+new ResizeObserver(() => {
+  if (skyResizeFrame) return;
+  skyResizeFrame = requestAnimationFrame(() => {
+    skyResizeFrame = null;
+    render();
+  });
+}).observe(document.getElementById('sky'));
 
 // Load constellation data independently so a network failure never affects
 // the existing DSO application.
