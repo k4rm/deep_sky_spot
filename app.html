@@ -1901,8 +1901,13 @@ document.getElementById('btnGps').addEventListener('click', () => {
       clearTimeout(timeoutId);
       btn.textContent = origText;
       btn.disabled = false;
-      const codes = { 1: 'Permission denied', 2: 'Position unavailable', 3: 'Request timed out' };
-      alert(`Location failed (${codes[err.code] || 'unknown error'}).\n\nEnter coordinates manually or check location permissions.`);
+      const codeMap = {
+        1: 'Permission Denied – Settings > Privacy > Location Services must be ON, and this site must have permission.',
+        2: 'Position Unavailable – Your device cannot get a GPS lock. Try outdoors or near a window.',
+        3: 'Timeout – Location took too long. Try again.'
+      };
+      const msg = codeMap[err.code] || `Unknown error (code ${err.code})`;
+      alert(`Location failed.\n\n${msg}\n\nYou can manually enter your latitude/longitude instead.`);
     },
     { timeout: 7000, enableHighAccuracy: false, maximumAge: 0 }
   );
