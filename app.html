@@ -1913,6 +1913,17 @@ document.getElementById('btnGps').addEventListener('click', () => {
   );
 });
 
+// When searching and the user clicks on the map (but not on a target),
+// clear the search to return to normal mode. Targets have e.stopPropagation()
+// so this only fires for empty space.
+document.getElementById('sky').addEventListener('click', (e) => {
+  const searchInput = document.getElementById('txtSearch');
+  if (searchInput.value.trim()) {
+    searchInput.value = '';
+    render();
+  }
+});
+
 // Re-render on any size change to the sky pane (window resize, panel
 // drawer open/close, orientation change) so target-node transforms are
 // recomputed against the current pixel size — otherwise their on-screen
