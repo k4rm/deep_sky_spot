@@ -1872,13 +1872,40 @@ telescopeSelect.addEventListener('change', () => {
 });
 
 document.getElementById('btnGps').addEventListener('click', () => {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(p => {
+  if (!navigator.geolocation) {
+    alert('Geolocation not supported. Manually enter your latitude/longitude below.');
+    return;
+  }
+
+  const btn = document.getElementById('btnGps');
+  btn.textContent = 'Requesting...';
+  btn.disabled = true;
+  const origText = 'Detect GPS Location';
+
+  const timeoutId = setTimeout(() => {
+    btn.textContent = origText;
+    btn.disabled = false;
+    alert('Location request timed out.\n\nMake sure:\n1. Location services are enabled\n2. This site has location permission\n3. You have a GPS signal\n\nOr enter coordinates manually.');
+  }, 8000);
+
+  navigator.geolocation.getCurrentPosition(
+    p => {
+      clearTimeout(timeoutId);
       document.getElementById('lat').value = p.coords.latitude.toFixed(4);
       document.getElementById('lng').value = p.coords.longitude.toFixed(4);
+      btn.textContent = origText;
+      btn.disabled = false;
       render();
-    });
-  }
+    },
+    err => {
+      clearTimeout(timeoutId);
+      btn.textContent = origText;
+      btn.disabled = false;
+      const codes = { 1: 'Permission denied', 2: 'Position unavailable', 3: 'Request timed out' };
+      alert(`Location failed (${codes[err.code] || 'unknown error'}).\n\nEnter coordinates manually or check location permissions.`);
+    },
+    { timeout: 7000, enableHighAccuracy: false, maximumAge: 0 }
+  );
 });
 
 // Re-render on any size change to the sky pane (window resize, panel
