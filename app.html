@@ -1678,7 +1678,7 @@ function render() {
       text.setAttribute("x", 10); text.setAttribute("y", 4);
       const isDeepLinkHighlight = urlDeepLinkActive && isDeepLinkTarget && !isSelected;
       text.setAttribute("fill", isSelected ? "#ff0055" : isSearchMatch ? "#ffe066" : isDeepLinkHighlight ? "#ff0055" : (isVisible ? "#ffffff" : "#777777"));
-      text.textContent = `${obj.name} (${pos.alt.toFixed(1)}°)`;
+      text.textContent = obj.name;
       group.appendChild(text);
 
       targetsGroup.appendChild(group);
