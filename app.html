@@ -50,7 +50,7 @@
       z-index: 10;
     }
     .panel-right { border-right: none; border-left: 1px solid var(--line); }
-    #leftPanel { width: 248px; min-width: 248px; }
+    #leftPanel { width: 198px; min-width: 198px; }
     .viewport {
       flex: 1;
       background: #04070c;
@@ -457,6 +457,9 @@
         <input type="checkbox" id="chkStar" checked> Reference Stars
       </label>
     </div>
+
+    <h2>Smart Telescope</h2>
+    <select id="telescopeSelect"></select>
   </div>
 
   <div class="viewport" id="viewport">
@@ -500,7 +503,7 @@
     </div>
 
     <h2 id="objectsListHeading">Visible Objects (<span id="visibleCount">0</span>)</h2>
-    <input type="text" id="txtSearch" placeholder="Search 350+ targets (M, NGC, IC, Planets)...">
+    <input type="text" id="txtSearch" placeholder="Search 375+ targets (M, NGC, IC, Planets)...">
     <label class="filter-item" style="margin-top: 6px;">
       <input type="checkbox" id="chkGlobalSearch"> Search all targets (ignore current view)
     </label>
@@ -892,12 +895,214 @@ const CATALOG_DSO = [
   { id: "etacarinae", name: "Eta Carinae (Carina)", wikiQuery: "Eta_Carinae", ra: 161.26, dec: -59.68, mag: 4.2, category: "Star", typeName: "Luminous Blue Variable", sizeArcmin: 1 },
   { id: "hadar", name: "Hadar / Beta Centauri", wikiQuery: "Beta_Centauri", ra: 210.96, dec: -60.37, mag: 0.58, category: "Star", typeName: "Triple Star System", sizeArcmin: 1 },
   { id: "acrux", name: "Acrux (Crux)", wikiQuery: "Acrux", ra: 186.65, dec: -63.10, mag: 0.76, category: "Star", typeName: "Multiple Star System", sizeArcmin: 1 },
-  { id: "atria", name: "Atria (Triangulum Australe)", wikiQuery: "Alpha_Trianguli_Australis", ra: 252.17, dec: -69.03, mag: 1.88, category: "Star", typeName: "Orange Giant", sizeArcmin: 1 }
+  { id: "atria", name: "Atria (Triangulum Australe)", wikiQuery: "Alpha_Trianguli_Australis", ra: 252.17, dec: -69.03, mag: 1.88, category: "Star", typeName: "Orange Giant", sizeArcmin: 1 },
+  // --- NEW NGC GALAXIES ---
+  { id: "ngc45", name: "NGC 45 Spiral Galaxy", wikiQuery: "NGC_45", ra: 3.52, dec: -23.18, mag: 10.4, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 6.2 },
+  { id: "ngc134", name: "NGC 134 Edge-on Spiral", wikiQuery: "NGC_134", ra: 7.59, dec: -33.25, mag: 10.3, category: "Galaxy", typeName: "Edge-on Spiral", sizeArcmin: 8.4 },
+  { id: "ngc157", name: "NGC 157 Spiral Galaxy", wikiQuery: "NGC_157", ra: 8.69, dec: -8.4, mag: 10.4, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 3.7 },
+  { id: "ngc488", name: "NGC 488 Spiral Galaxy", wikiQuery: "NGC_488", ra: 20.44, dec: 5.26, mag: 10.3, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 5.0 },
+  { id: "ngc613", name: "NGC 613 Spiral Galaxy", wikiQuery: "NGC_613", ra: 23.58, dec: -29.42, mag: 10.3, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 5.5 },
+  { id: "ngc720", name: "NGC 720 Elliptical Galaxy", wikiQuery: "NGC_720", ra: 28.25, dec: -13.74, mag: 10.1, category: "Galaxy", typeName: "Elliptical Galaxy", sizeArcmin: 4.5 },
+  { id: "ngc908", name: "NGC 908 Spiral Galaxy", wikiQuery: "NGC_908", ra: 35.77, dec: -21.23, mag: 10.3, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 6.1 },
+  { id: "ngc936", name: "NGC 936 Lenticular Galaxy", wikiQuery: "NGC_936", ra: 36.91, dec: -1.16, mag: 10.2, category: "Galaxy", typeName: "Lenticular Galaxy", sizeArcmin: 4.4 },
+  { id: "ngc1055", name: "NGC 1055 Barred Spiral", wikiQuery: "NGC_1055", ra: 40.44, dec: 0.44, mag: 10.6, category: "Galaxy", typeName: "Barred Spiral", sizeArcmin: 6.9 },
+  { id: "ngc1084", name: "NGC 1084 Spiral Galaxy", wikiQuery: "NGC_1084", ra: 41.5, dec: -7.58, mag: 10.6, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 3.4 },
+  { id: "ngc1232", name: "NGC 1232 Spiral Galaxy", wikiQuery: "NGC_1232", ra: 47.44, dec: -20.58, mag: 10.1, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 6.8 },
+  { id: "ngc1291", name: "NGC 1291 Lenticular Galaxy", wikiQuery: "NGC_1291", ra: 49.33, dec: -41.11, mag: 8.7, category: "Galaxy", typeName: "Lenticular Galaxy", sizeArcmin: 11.2 },
+  { id: "ngc1316", name: "NGC 1316 Fornax A", wikiQuery: "NGC_1316", ra: 50.67, dec: -37.21, mag: 8.5, category: "Galaxy", typeName: "Lenticular Galaxy", sizeArcmin: 13.5 },
+  { id: "ngc1398", name: "NGC 1398 Barred Spiral", wikiQuery: "NGC_1398", ra: 54.72, dec: -26.34, mag: 9.6, category: "Galaxy", typeName: "Barred Spiral", sizeArcmin: 7.0 },
+  { id: "ngc1407", name: "NGC 1407 Elliptical Galaxy", wikiQuery: "NGC_1407", ra: 55.05, dec: -18.58, mag: 9.7, category: "Galaxy", typeName: "Elliptical Galaxy", sizeArcmin: 5.7 },
+  { id: "ngc1512", name: "NGC 1512 Spiral Galaxy", wikiQuery: "NGC_1512", ra: 60.98, dec: -43.35, mag: 10.4, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 8.4 },
+  { id: "ngc1553", name: "NGC 1553 Lenticular Galaxy", wikiQuery: "NGC_1553", ra: 64.04, dec: -55.78, mag: 9.3, category: "Galaxy", typeName: "Lenticular Galaxy", sizeArcmin: 6.2 },
+  { id: "ngc1566", name: "NGC 1566 Spiral Galaxy", wikiQuery: "NGC_1566", ra: 65.0, dec: -54.94, mag: 9.7, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 7.2 },
+  { id: "ngc1569", name: "NGC 1569 Irregular Galaxy", wikiQuery: "NGC_1569", ra: 67.7, dec: 64.85, mag: 11.1, category: "Galaxy", typeName: "Irregular Galaxy", sizeArcmin: 3.9 },
+  { id: "ngc1560", name: "NGC 1560 Edge-on Spiral", wikiQuery: "NGC_1560", ra: 68.2, dec: 71.88, mag: 11.5, category: "Galaxy", typeName: "Edge-on Spiral", sizeArcmin: 8.3 },
+  { id: "ngc1672", name: "NGC 1672 Spiral Galaxy", wikiQuery: "NGC_1672", ra: 71.43, dec: -59.25, mag: 10.2, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 6.1 },
+  { id: "ngc1808", name: "NGC 1808 Spiral Galaxy", wikiQuery: "NGC_1808", ra: 76.93, dec: -37.51, mag: 10.2, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 5.4 },
+  { id: "ngc2207", name: "NGC 2207 Spiral Galaxy", wikiQuery: "NGC_2207_and_IC_2163", ra: 94.09, dec: -21.37, mag: 11.1, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 4.9 },
+  { id: "ngc2146", name: "NGC 2146 Dusty Hand Galaxy", wikiQuery: "NGC_2146", ra: 94.66, dec: 78.36, mag: 10.7, category: "Galaxy", typeName: "Barred Spiral", sizeArcmin: 5.3 },
+  { id: "ngc2217", name: "NGC 2217 Lenticular Galaxy", wikiQuery: "NGC_2217", ra: 95.42, dec: -27.23, mag: 10.6, category: "Galaxy", typeName: "Lenticular Galaxy", sizeArcmin: 4.6 },
+  { id: "ngc2336", name: "NGC 2336 Spiral Galaxy", wikiQuery: "NGC_2336", ra: 111.77, dec: 80.18, mag: 10.7, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 5.0 },
+  { id: "ngc2366", name: "NGC 2366 Irregular Galaxy", wikiQuery: "NGC_2366", ra: 112.22, dec: 69.21, mag: 11.2, category: "Galaxy", typeName: "Irregular Galaxy", sizeArcmin: 4.4 },
+  { id: "ngc2442", name: "NGC 2442 Meathook Galaxy", wikiQuery: "NGC_2442_and_NGC_2443", ra: 114.1, dec: -69.53, mag: 10.6, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 4.7 },
+  { id: "ngc2537", name: "NGC 2537 Bear Paw Galaxy", wikiQuery: "NGC_2537", ra: 123.31, dec: 45.99, mag: 11.7, category: "Galaxy", typeName: "Barred Spiral", sizeArcmin: 2.1 },
+  { id: "ngc2613", name: "NGC 2613 Edge-on Spiral", wikiQuery: "NGC_2613", ra: 128.35, dec: -22.97, mag: 10.4, category: "Galaxy", typeName: "Edge-on Spiral", sizeArcmin: 7.6 },
+  { id: "ngc2685", name: "NGC 2685 Helix Galaxy", wikiQuery: "NGC_2685", ra: 133.89, dec: 58.73, mag: 11.3, category: "Galaxy", typeName: "Lenticular Galaxy", sizeArcmin: 4.3 },
+  { id: "ngc2655", name: "NGC 2655 Lenticular Galaxy", wikiQuery: "NGC_2655", ra: 133.91, dec: 78.22, mag: 10.4, category: "Galaxy", typeName: "Lenticular Galaxy", sizeArcmin: 3.9 },
+  { id: "ngc2768", name: "NGC 2768 Elliptical Galaxy", wikiQuery: "NGC_2768", ra: 137.91, dec: 60.04, mag: 9.9, category: "Galaxy", typeName: "Elliptical Galaxy", sizeArcmin: 5.6 },
+  { id: "ngc2835", name: "NGC 2835 Spiral Galaxy", wikiQuery: "NGC_2835", ra: 139.47, dec: -22.35, mag: 10.6, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 6.4 },
+  { id: "ngc2997", name: "NGC 2997 Spiral Galaxy", wikiQuery: "NGC_2997", ra: 146.41, dec: -31.19, mag: 9.4, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 10.3 },
+  { id: "ngc2976", name: "NGC 2976 Spiral Galaxy", wikiQuery: "NGC_2976", ra: 146.81, dec: 67.92, mag: 10.2, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 5.8 },
+  { id: "ngc3109", name: "NGC 3109 Edge-on Barred Spiral", wikiQuery: "NGC_3109", ra: 150.78, dec: -26.16, mag: 10.5, category: "Galaxy", typeName: "Edge-on Barred Spiral", sizeArcmin: 16.0 },
+  { id: "ngc3077", name: "NGC 3077 Spiral Galaxy", wikiQuery: "NGC_3077", ra: 150.83, dec: 68.73, mag: 9.9, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 5.2 },
+  { id: "ngc3190", name: "NGC 3190 Spiral Galaxy", wikiQuery: "NGC_3190", ra: 154.52, dec: 21.83, mag: 11.1, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 3.6 },
+  { id: "ngc3184", name: "NGC 3184 Little Pinwheel Galaxy", wikiQuery: "NGC_3184", ra: 154.57, dec: 41.42, mag: 9.8, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 7.4 },
+  { id: "ngc3198", name: "NGC 3198 Spiral Galaxy", wikiQuery: "NGC_3198", ra: 154.98, dec: 45.55, mag: 10.4, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 6.5 },
+  { id: "ngc3344", name: "NGC 3344 Spiral Galaxy", wikiQuery: "NGC_3344", ra: 160.88, dec: 24.92, mag: 10.0, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 6.7 },
+  { id: "ngc3384", name: "NGC 3384 Elliptical Galaxy", wikiQuery: "NGC_3384", ra: 162.07, dec: 12.63, mag: 10.0, category: "Galaxy", typeName: "Elliptical Galaxy", sizeArcmin: 5.2 },
+  { id: "ngc3486", name: "NGC 3486 Spiral Galaxy", wikiQuery: "NGC_3486", ra: 165.1, dec: 28.97, mag: 10.6, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 5.8 },
+  { id: "ngc3585", name: "NGC 3585 Elliptical Galaxy", wikiQuery: "NGC_3585", ra: 168.32, dec: -26.75, mag: 9.7, category: "Galaxy", typeName: "Elliptical Galaxy", sizeArcmin: 6.6 },
+  { id: "ngc3607", name: "NGC 3607 Elliptical Galaxy", wikiQuery: "NGC_3607", ra: 169.23, dec: 18.05, mag: 10.0, category: "Galaxy", typeName: "Elliptical Galaxy", sizeArcmin: 4.6 },
+  { id: "ngc3621", name: "NGC 3621 Barred Spiral", wikiQuery: "NGC_3621", ra: 169.57, dec: -32.81, mag: 9.6, category: "Galaxy", typeName: "Barred Spiral", sizeArcmin: 9.8 },
+  { id: "ngc3718", name: "NGC 3718 Spiral Galaxy", wikiQuery: "NGC_3718", ra: 173.15, dec: 53.07, mag: 10.7, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 4.7 },
+  { id: "ngc3726", name: "NGC 3726 Spiral Galaxy", wikiQuery: "NGC_3726", ra: 173.34, dec: 47.03, mag: 10.5, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 5.3 },
+  { id: "ngc3938", name: "NGC 3938 Spiral Galaxy", wikiQuery: "NGC_3938", ra: 178.21, dec: 44.12, mag: 10.4, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 3.5 },
+  { id: "ngc3953", name: "NGC 3953 Spiral Galaxy", wikiQuery: "NGC_3953", ra: 178.45, dec: 52.33, mag: 10.1, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 6.1 },
+  { id: "ngc4013", name: "NGC 4013 Edge-on Spiral", wikiQuery: "NGC_4013", ra: 179.63, dec: 43.95, mag: 11.3, category: "Galaxy", typeName: "Edge-on Spiral", sizeArcmin: 4.9 },
+  { id: "ngc4051", name: "NGC 4051 Spiral Galaxy", wikiQuery: "NGC_4051", ra: 180.79, dec: 44.53, mag: 11.4, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 4.9 },
+  { id: "ngc4088", name: "NGC 4088 Spiral Galaxy", wikiQuery: "NGC_4088", ra: 181.39, dec: 50.54, mag: 10.6, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 7.0 },
+  { id: "ngc4125", name: "NGC 4125 Elliptical Galaxy", wikiQuery: "NGC_4125", ra: 182.03, dec: 65.17, mag: 9.7, category: "Galaxy", typeName: "Elliptical Galaxy", sizeArcmin: 5.9 },
+  { id: "ngc4151", name: "NGC 4151 Spiral Galaxy", wikiQuery: "NGC_4151", ra: 182.64, dec: 39.41, mag: 11.5, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 2.9 },
+  { id: "ngc4274", name: "NGC 4274 Barred Spiral", wikiQuery: "NGC_4274", ra: 184.96, dec: 29.61, mag: 10.4, category: "Galaxy", typeName: "Barred Spiral", sizeArcmin: 3.6 },
+  { id: "ngc4395", name: "NGC 4395 Spiral Galaxy", wikiQuery: "NGC_4395", ra: 186.45, dec: 33.55, mag: 10.3, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 4.2 },
+  { id: "ngc4414", name: "NGC 4414 Spiral Galaxy", wikiQuery: "NGC_4414", ra: 186.61, dec: 31.22, mag: 10.2, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 1.9 },
+  { id: "ngc4517", name: "NGC 4517 Edge-on Spiral", wikiQuery: "NGC_4517", ra: 188.19, dec: 0.12, mag: 10.5, category: "Galaxy", typeName: "Edge-on Spiral", sizeArcmin: 9.0 },
+  { id: "ngc4526", name: "NGC 4526 Lenticular Galaxy", wikiQuery: "NGC_4526", ra: 188.51, dec: 7.7, mag: 9.6, category: "Galaxy", typeName: "Lenticular Galaxy", sizeArcmin: 9.6 },
+  { id: "ngc4636", name: "NGC 4636 Elliptical Galaxy", wikiQuery: "NGC_4636", ra: 190.71, dec: 2.69, mag: 10.0, category: "Galaxy", typeName: "Elliptical Galaxy", sizeArcmin: 6.3 },
+  { id: "ngc4699", name: "NGC 4699 Spiral Galaxy", wikiQuery: "NGC_4699", ra: 192.26, dec: -8.66, mag: 9.5, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 4.0 },
+  { id: "ngc4762", name: "NGC 4762 Lenticular Galaxy", wikiQuery: "NGC_4762", ra: 193.23, dec: 11.23, mag: 10.2, category: "Galaxy", typeName: "Lenticular Galaxy", sizeArcmin: 8.3 },
+  { id: "ngc4976", name: "NGC 4976 Elliptical Galaxy", wikiQuery: "NGC_4976", ra: 197.16, dec: -49.51, mag: 10.1, category: "Galaxy", typeName: "Elliptical Galaxy", sizeArcmin: 5.8 },
+  { id: "ngc5102", name: "NGC 5102 Elliptical Galaxy", wikiQuery: "NGC_5102", ra: 200.49, dec: -36.63, mag: 9.9, category: "Galaxy", typeName: "Elliptical Galaxy", sizeArcmin: 9.7 },
+  { id: "ngc5253", name: "NGC 5253 Barred Spiral", wikiQuery: "NGC_5253", ra: 204.98, dec: -31.64, mag: 10.3, category: "Galaxy", typeName: "Barred Spiral", sizeArcmin: 5.0 },
+  { id: "ngc5322", name: "NGC 5322 Elliptical Galaxy", wikiQuery: "NGC_5322", ra: 207.31, dec: 60.19, mag: 10.1, category: "Galaxy", typeName: "Elliptical Galaxy", sizeArcmin: 5.6 },
+  { id: "ngc5364", name: "NGC 5364 Spiral Galaxy", wikiQuery: "NGC_5364", ra: 209.05, dec: 5.01, mag: 10.5, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 3.8 },
+  { id: "ngc5585", name: "NGC 5585 Spiral Galaxy", wikiQuery: "NGC_5585", ra: 214.95, dec: 56.73, mag: 11.0, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 4.3 },
+  { id: "ngc5566", name: "NGC 5566 Barred Spiral", wikiQuery: "NGC_5566", ra: 215.08, dec: 3.93, mag: 10.5, category: "Galaxy", typeName: "Barred Spiral", sizeArcmin: 5.4 },
+  { id: "ngc5643", name: "NGC 5643 Spiral Galaxy", wikiQuery: "NGC_5643", ra: 218.17, dec: -44.17, mag: 11.5, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 5.3 },
+  { id: "ngc5676", name: "NGC 5676 Spiral Galaxy", wikiQuery: "NGC_5676", ra: 218.2, dec: 49.46, mag: 11.2, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 3.6 },
+  { id: "ngc5746", name: "NGC 5746 Mini Sombrero Galaxy", wikiQuery: "NGC_5746", ra: 221.23, dec: 1.95, mag: 10.6, category: "Galaxy", typeName: "Edge-on Spiral", sizeArcmin: 7.2 },
+  { id: "ngc5846", name: "NGC 5846 Elliptical Galaxy", wikiQuery: "NGC_5846", ra: 226.62, dec: 1.61, mag: 10.2, category: "Galaxy", typeName: "Elliptical Galaxy", sizeArcmin: 4.3 },
+  { id: "ngc6221", name: "NGC 6221 Spiral Galaxy", wikiQuery: "NGC_6221", ra: 253.19, dec: -59.22, mag: 10.5, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 4.8 },
+  { id: "ngc6300", name: "NGC 6300 Barred Spiral", wikiQuery: "NGC_6300", ra: 259.25, dec: -62.82, mag: 10.3, category: "Galaxy", typeName: "Barred Spiral", sizeArcmin: 5.3 },
+  { id: "ngc6384", name: "NGC 6384 Spiral Galaxy", wikiQuery: "NGC_6384", ra: 263.1, dec: 7.06, mag: 10.6, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 2.5 },
+  { id: "ngc7049", name: "NGC 7049 Lenticular Galaxy", wikiQuery: "NGC_7049", ra: 319.75, dec: -48.56, mag: 10.6, category: "Galaxy", typeName: "Lenticular Galaxy", sizeArcmin: 3.9 },
+  { id: "ngc7090", name: "NGC 7090 Edge-on Spiral", wikiQuery: "NGC_7090", ra: 324.12, dec: -54.56, mag: 10.9, category: "Galaxy", typeName: "Edge-on Spiral", sizeArcmin: 8.2 },
+  { id: "ngc7217", name: "NGC 7217 Spiral Galaxy", wikiQuery: "NGC_7217", ra: 331.97, dec: 31.36, mag: 10.5, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 4.5 },
+  { id: "ngc7410", name: "NGC 7410 Barred Spiral", wikiQuery: "NGC_7410", ra: 343.75, dec: -39.66, mag: 11.2, category: "Galaxy", typeName: "Barred Spiral", sizeArcmin: 6.0 },
+  { id: "ngc7457", name: "NGC 7457 Elliptical Galaxy", wikiQuery: "NGC_7457", ra: 345.25, dec: 30.14, mag: 11.0, category: "Galaxy", typeName: "Elliptical Galaxy", sizeArcmin: 4.0 },
+  { id: "ngc7507", name: "NGC 7507 Elliptical Galaxy", wikiQuery: "NGC_7507", ra: 348.03, dec: -28.54, mag: 10.0, category: "Galaxy", typeName: "Elliptical Galaxy", sizeArcmin: 3.3 },
+  { id: "ngc7582", name: "NGC 7582 Barred Spiral", wikiQuery: "NGC_7582", ra: 349.6, dec: -42.37, mag: 11.0, category: "Galaxy", typeName: "Barred Spiral", sizeArcmin: 7.0 },
+  { id: "ngc7606", name: "NGC 7606 Spiral Galaxy", wikiQuery: "NGC_7606", ra: 349.77, dec: -8.49, mag: 11.0, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 5.3 },
+  { id: "ngc7640", name: "NGC 7640 Edge-on Spiral", wikiQuery: "NGC_7640", ra: 350.53, dec: 40.85, mag: 11.0, category: "Galaxy", typeName: "Edge-on Spiral", sizeArcmin: 8.1 },
+  { id: "ngc7727", name: "NGC 7727 Spiral Galaxy", wikiQuery: "NGC_7727", ra: 354.97, dec: -12.29, mag: 10.6, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 3.6 },
+  { id: "ngc7742", name: "NGC 7742 Fried Egg Galaxy", wikiQuery: "NGC_7742", ra: 356.07, dec: 10.77, mag: 11.6, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 1.7 },
+  { id: "ngc7793", name: "NGC 7793 Spiral Galaxy", wikiQuery: "NGC_7793", ra: 359.46, dec: -32.59, mag: 9.3, category: "Galaxy", typeName: "Spiral Galaxy", sizeArcmin: 10.4 },
+  // --- NEW NGC NEBULAE ---
+  { id: "ngc346", name: "NGC 346 Emission Nebula", wikiQuery: "NGC_346", ra: 14.77, dec: -72.18, mag: 10.3, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 8.5 },
+  { id: "ngc1360", name: "NGC 1360 Robin's Egg Nebula", wikiQuery: "NGC_1360", ra: 53.31, dec: -25.87, mag: 9.4, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 6.4 },
+  { id: "ngc1514", name: "NGC 1514 Crystal Ball Nebula", wikiQuery: "NGC_1514", ra: 62.32, dec: 30.78, mag: 10.2, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 2.2 },
+  { id: "ngc1535", name: "NGC 1535 Planetary Nebula", wikiQuery: "NGC_1535", ra: 63.57, dec: -12.74, mag: 9.6, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.85 },
+  { id: "ngc1624", name: "NGC 1624 Emission Nebula", wikiQuery: "NGC_1624", ra: 70.15, dec: 50.46, mag: 11.8, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 3.0 },
+  { id: "ngc1788", name: "NGC 1788 Cosmic Bat Nebula", wikiQuery: "NGC_1788", ra: 76.72, dec: -3.34, mag: 9.0, category: "Nebula", typeName: "Reflection Nebula", sizeArcmin: 2.0 },
+  { id: "ngc1931", name: "NGC 1931 Emission Nebula", wikiQuery: "NGC_1931", ra: 82.84, dec: 34.23, mag: 10.1, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 4.8 },
+  { id: "ngc2014", name: "NGC 2014 Cosmic Reef", wikiQuery: "NGC_2014", ra: 83.1, dec: -67.69, mag: 9.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 5.1 },
+  { id: "ngc1999", name: "NGC 1999 Reflection Nebula", wikiQuery: "NGC_1999", ra: 84.1, dec: -6.71, mag: 9.5, category: "Nebula", typeName: "Reflection Nebula", sizeArcmin: 2.0 },
+  { id: "ngc2022", name: "NGC 2022 Planetary Nebula", wikiQuery: "NGC_2022", ra: 85.53, dec: 9.09, mag: 11.6, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.32 },
+  { id: "ngc2071", name: "NGC 2071 Reflection Nebula", wikiQuery: "NGC_2071", ra: 86.79, dec: 0.3, mag: 8.0, category: "Nebula", typeName: "Reflection Nebula", sizeArcmin: 7.0 },
+  { id: "ngc2346", name: "NGC 2346 Butterfly Planetary", wikiQuery: "NGC_2346", ra: 107.34, dec: -0.81, mag: 11.6, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.87 },
+  { id: "ngc2371", name: "NGC 2371 Planetary Nebula", wikiQuery: "NGC_2371-2", ra: 111.39, dec: 29.49, mag: 11.2, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 2.2 },
+  { id: "ngc2438", name: "NGC 2438 Planetary Nebula", wikiQuery: "NGC_2438", ra: 115.46, dec: -14.74, mag: 10.8, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 1.1 },
+  { id: "ngc2440", name: "NGC 2440 Planetary Nebula", wikiQuery: "NGC_2440", ra: 115.48, dec: -18.21, mag: 9.4, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.27 },
+  { id: "ngc2452", name: "NGC 2452 Planetary Nebula", wikiQuery: "NGC_2452", ra: 116.86, dec: -27.34, mag: 12.0, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.32 },
+  { id: "ngc2736", name: "NGC 2736 Pencil Nebula", wikiQuery: "NGC_2736", ra: 135.05, dec: -45.95, mag: 12.0, category: "Nebula", typeName: "Supernova Remnant", sizeArcmin: 30.0 },
+  { id: "ngc2818", name: "NGC 2818 Planetary Nebula", wikiQuery: "NGC_2818", ra: 139.04, dec: -36.62, mag: 11.6, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.83 },
+  { id: "ngc2899", name: "NGC 2899 Planetary Nebula", wikiQuery: "NGC_2899", ra: 141.76, dec: -56.11, mag: 11.8, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 1.5 },
+  { id: "ngc3324", name: "NGC 3324 Gabriela Mistral Nebula", wikiQuery: "NGC_3324", ra: 159.34, dec: -58.62, mag: 6.7, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 4.8 },
+  { id: "ngc3603", name: "NGC 3603 Star-forming Region", wikiQuery: "NGC_3603", ra: 168.74, dec: -61.24, mag: 9.1, category: "Nebula", typeName: "Star-forming Region", sizeArcmin: 3.3 },
+  { id: "ngc3918", name: "NGC 3918 Blue Planetary", wikiQuery: "NGC_3918", ra: 177.57, dec: -57.18, mag: 8.1, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.32 },
+  { id: "ngc4361", name: "NGC 4361 Planetary Nebula", wikiQuery: "NGC_4361", ra: 186.13, dec: -18.78, mag: 10.9, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 1.1 },
+  { id: "ngc5189", name: "NGC 5189 Spiral Planetary", wikiQuery: "NGC_5189", ra: 203.39, dec: -65.97, mag: 8.2, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 2.3 },
+  { id: "ngc6153", name: "NGC 6153 Planetary Nebula", wikiQuery: "NGC_6153", ra: 247.88, dec: -40.25, mag: 10.9, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.4 },
+  { id: "ngc6164", name: "NGC 6164 Emission Nebula", wikiQuery: "NGC_6164_and_6165", ra: 248.47, dec: -48.11, mag: 6.7, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 1.4 },
+  { id: "ngc6210", name: "NGC 6210 Turtle Nebula", wikiQuery: "NGC_6210", ra: 251.12, dec: 23.8, mag: 9.7, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.5 },
+  { id: "ngc6309", name: "NGC 6309 Box Nebula", wikiQuery: "NGC_6309", ra: 258.52, dec: -12.91, mag: 11.5, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.26 },
+  { id: "ngc6337", name: "NGC 6337 Planetary Nebula", wikiQuery: "NGC_6337", ra: 260.57, dec: -38.48, mag: 12.3, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.85 },
+  { id: "ngc6369", name: "NGC 6369 Little Ghost Nebula", wikiQuery: "Little_Ghost_Nebula", ra: 262.34, dec: -23.76, mag: 11.4, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.63 },
+  { id: "ngc6445", name: "NGC 6445 Planetary Nebula", wikiQuery: "NGC_6445", ra: 267.31, dec: -20.01, mag: 11.2, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.55 },
+  { id: "ngc6537", name: "NGC 6537 Red Spider Nebula", wikiQuery: "Red_Spider_Nebula", ra: 271.3, dec: -19.84, mag: 11.6, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.17 },
+  { id: "ngc6572", name: "NGC 6572 Planetary Nebula", wikiQuery: "NGC_6572", ra: 273.03, dec: 6.85, mag: 8.1, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.18 },
+  { id: "ngc6629", name: "NGC 6629 Planetary Nebula", wikiQuery: "NGC_6629", ra: 276.43, dec: -23.2, mag: 11.3, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.26 },
+  { id: "ngc6751", name: "NGC 6751 Glowing Eye Nebula", wikiQuery: "NGC_6751", ra: 286.48, dec: -5.99, mag: 11.9, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.34 },
+  { id: "ngc6778", name: "NGC 6778 Planetary Nebula", wikiQuery: "NGC_6778", ra: 289.6, dec: -1.6, mag: 12.3, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.26 },
+  { id: "ngc6818", name: "NGC 6818 Little Gem Nebula", wikiQuery: "NGC_6818", ra: 295.99, dec: -14.15, mag: 9.3, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.77 },
+  { id: "ngc6857", name: "NGC 6857 Emission Nebula", wikiQuery: "NGC_6857", ra: 300.45, dec: 33.53, mag: 11.4, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 0.63 },
+  { id: "ngc6891", name: "NGC 6891 Planetary Nebula", wikiQuery: "NGC_6891", ra: 303.79, dec: 12.7, mag: 10.5, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.25 },
+  { id: "ngc6905", name: "NGC 6905 Blue Flash Nebula", wikiQuery: "NGC_6905", ra: 305.6, dec: 20.1, mag: 11.1, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.67 },
+  { id: "ngc7008", name: "NGC 7008 Fetus Nebula", wikiQuery: "NGC_7008", ra: 315.14, dec: 54.54, mag: 10.7, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 1.4 },
+  { id: "ngc7026", name: "NGC 7026 Cheeseburger Nebula", wikiQuery: "NGC_7026", ra: 316.58, dec: 47.85, mag: 10.9, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.33 },
+  { id: "ngc7048", name: "NGC 7048 Planetary Nebula", wikiQuery: "NGC_7048", ra: 318.56, dec: 46.29, mag: 12.1, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 1.0 },
+  { id: "ngc7354", name: "NGC 7354 Planetary Nebula", wikiQuery: "NGC_7354", ra: 340.08, dec: 61.29, mag: 12.2, category: "Nebula", typeName: "Planetary Nebula", sizeArcmin: 0.38 },
+  { id: "ngc7538", name: "NGC 7538 Emission Nebula", wikiQuery: "NGC_7538", ra: 348.4, dec: 61.5, mag: 9.0, category: "Nebula", typeName: "Emission Nebula", sizeArcmin: 8.0 },
+  // --- NEW NGC STAR CLUSTERS ---
+  { id: "ngc129", name: "NGC 129 Open Cluster", wikiQuery: "NGC_129", ra: 7.61, dec: 60.21, mag: 6.5, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 5.4 },
+  { id: "ngc654", name: "NGC 654 Open Cluster", wikiQuery: "NGC_654", ra: 26.01, dec: 61.88, mag: 6.5, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 6.3 },
+  { id: "ngc744", name: "NGC 744 Open Cluster", wikiQuery: "NGC_744", ra: 29.66, dec: 55.48, mag: 7.9, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 11.7 },
+  { id: "ngc957", name: "NGC 957 Open Cluster", wikiQuery: "NGC_957", ra: 38.36, dec: 57.55, mag: 7.6, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 10.2 },
+  { id: "ngc1027", name: "NGC 1027 Open Cluster", wikiQuery: "NGC_1027", ra: 40.66, dec: 61.61, mag: 6.7, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 7.8 },
+  { id: "ngc1342", name: "NGC 1342 Open Cluster", wikiQuery: "NGC_1342", ra: 52.91, dec: 37.39, mag: 6.7, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 6.3 },
+  { id: "ngc1444", name: "NGC 1444 Open Cluster", wikiQuery: "NGC_1444", ra: 57.36, dec: 52.65, mag: 6.6, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 3.6 },
+  { id: "ngc1545", name: "NGC 1545 Open Cluster", wikiQuery: "NGC_1545", ra: 65.22, dec: 50.19, mag: 6.2, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 4.2 },
+  { id: "ngc1582", name: "NGC 1582 Open Cluster", wikiQuery: "NGC_1582", ra: 67.93, dec: 43.71, mag: 7.0, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 7.8 },
+  { id: "ngc1647", name: "NGC 1647 Open Cluster", wikiQuery: "NGC_1647", ra: 71.5, dec: 19.09, mag: 6.4, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 27.0 },
+  { id: "ngc1857", name: "NGC 1857 Open Cluster", wikiQuery: "NGC_1857", ra: 80.03, dec: 39.34, mag: 7.0, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 4.5 },
+  { id: "ngc1980", name: "NGC 1980 Lower Sword Cluster", wikiQuery: "NGC_1980", ra: 83.81, dec: -5.93, mag: 2.5, category: "Cluster", typeName: "Cluster with Nebulosity", sizeArcmin: 9.3 },
+  { id: "ngc1981", name: "NGC 1981 Upper Sword Cluster", wikiQuery: "NGC_1981", ra: 83.85, dec: -4.5, mag: 4.2, category: "Cluster", typeName: "Cluster with Nebulosity", sizeArcmin: 9.0 },
+  { id: "ngc2129", name: "NGC 2129 Open Cluster", wikiQuery: "NGC_2129", ra: 90.28, dec: 23.33, mag: 6.7, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 3.9 },
+  { id: "ngc2194", name: "NGC 2194 Open Cluster", wikiQuery: "NGC_2194", ra: 93.44, dec: 12.81, mag: 8.5, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 8.7 },
+  { id: "ngc2281", name: "NGC 2281 Open Cluster", wikiQuery: "NGC_2281", ra: 102.08, dec: 41.04, mag: 5.4, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 10.8 },
+  { id: "ngc2298", name: "NGC 2298 Globular Cluster", wikiQuery: "NGC_2298", ra: 102.25, dec: -36.01, mag: 8.9, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 4.8 },
+  { id: "ngc2301", name: "NGC 2301 Great Bird Cluster", wikiQuery: "NGC_2301", ra: 102.96, dec: 0.48, mag: 6.0, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 10.2 },
+  { id: "ngc2354", name: "NGC 2354 Open Cluster", wikiQuery: "NGC_2354", ra: 108.5, dec: -25.73, mag: 6.5, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 4.8 },
+  { id: "ngc2423", name: "NGC 2423 Open Cluster", wikiQuery: "NGC_2423", ra: 114.3, dec: -13.86, mag: 6.7, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 11.7 },
+  { id: "ngc2439", name: "NGC 2439 Open Cluster", wikiQuery: "NGC_2439", ra: 115.19, dec: -31.69, mag: 6.9, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 8.7 },
+  { id: "ngc2547", name: "NGC 2547 Open Cluster", wikiQuery: "NGC_2547", ra: 122.51, dec: -49.2, mag: 4.7, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 7.8 },
+  { id: "ngc2539", name: "NGC 2539 Open Cluster", wikiQuery: "NGC_2539", ra: 122.66, dec: -12.83, mag: 6.5, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 12.3 },
+  { id: "ngc2546", name: "NGC 2546 Open Cluster", wikiQuery: "NGC_2546", ra: 123.17, dec: -37.66, mag: 6.3, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 16.5 },
+  { id: "ngc2808", name: "NGC 2808 Globular Cluster", wikiQuery: "NGC_2808", ra: 138.01, dec: -64.86, mag: 5.7, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 9.0 },
+  { id: "ngc3228", name: "NGC 3228 Open Cluster", wikiQuery: "NGC_3228", ra: 155.39, dec: -51.76, mag: 6.0, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 6.6 },
+  { id: "ngc3293", name: "NGC 3293 Gem Cluster", wikiQuery: "NGC_3293", ra: 158.96, dec: -58.23, mag: 4.7, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 5.1 },
+  { id: "ngc4103", name: "NGC 4103 Open Cluster", wikiQuery: "NGC_4103", ra: 181.65, dec: -61.25, mag: 7.4, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 7.8 },
+  { id: "ngc5466", name: "NGC 5466 Globular Cluster", wikiQuery: "NGC_5466", ra: 211.36, dec: 28.53, mag: 9.7, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 6.6 },
+  { id: "ngc5460", name: "NGC 5460 Open Cluster", wikiQuery: "NGC_5460", ra: 211.84, dec: -48.28, mag: 5.6, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 13.2 },
+  { id: "ngc5617", name: "NGC 5617 Open Cluster", wikiQuery: "NGC_5617", ra: 217.44, dec: -60.72, mag: 6.3, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 5.1 },
+  { id: "ngc5662", name: "NGC 5662 Open Cluster", wikiQuery: "NGC_5662", ra: 218.73, dec: -56.68, mag: 5.5, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 8.1 },
+  { id: "ngc5824", name: "NGC 5824 Globular Cluster", wikiQuery: "NGC_5824", ra: 225.99, dec: -33.07, mag: 9.6, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 5.1 },
+  { id: "ngc5822", name: "NGC 5822 Open Cluster", wikiQuery: "NGC_5822", ra: 226.03, dec: -54.36, mag: 6.5, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 18.0 },
+  { id: "ngc5897", name: "NGC 5897 Globular Cluster", wikiQuery: "NGC_5897", ra: 229.35, dec: -21.01, mag: 8.5, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 9.9 },
+  { id: "ngc5927", name: "NGC 5927 Globular Cluster", wikiQuery: "NGC_5927", ra: 232.0, dec: -50.67, mag: 8.9, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 6.6 },
+  { id: "ngc6067", name: "NGC 6067 Open Cluster", wikiQuery: "NGC_6067", ra: 243.29, dec: -54.23, mag: 5.6, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 8.1 },
+  { id: "ngc6134", name: "NGC 6134 Open Cluster", wikiQuery: "NGC_6134", ra: 246.95, dec: -49.16, mag: 7.2, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 6.9 },
+  { id: "ngc6208", name: "NGC 6208 Open Cluster", wikiQuery: "NGC_6208", ra: 252.34, dec: -53.72, mag: 7.2, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 8.4 },
+  { id: "ngc6242", name: "NGC 6242 Open Cluster", wikiQuery: "NGC_6242", ra: 253.88, dec: -39.47, mag: 6.4, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 6.6 },
+  { id: "ngc6250", name: "NGC 6250 Cluster with Nebulosity", wikiQuery: "NGC_6250", ra: 254.48, dec: -45.95, mag: 5.9, category: "Cluster", typeName: "Cluster with Nebulosity", sizeArcmin: 9.6 },
+  { id: "ngc6281", name: "NGC 6281 Open Cluster", wikiQuery: "NGC_6281", ra: 256.19, dec: -37.95, mag: 5.4, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 10.2 },
+  { id: "ngc6293", name: "NGC 6293 Globular Cluster", wikiQuery: "NGC_6293", ra: 257.54, dec: -26.58, mag: 9.0, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 4.5 },
+  { id: "ngc6304", name: "NGC 6304 Globular Cluster", wikiQuery: "NGC_6304", ra: 258.63, dec: -29.46, mag: 9.0, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 3.6 },
+  { id: "ngc6356", name: "NGC 6356 Globular Cluster", wikiQuery: "NGC_6356", ra: 260.9, dec: -17.81, mag: 7.4, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 5.4 },
+  { id: "ngc6362", name: "NGC 6362 Globular Cluster", wikiQuery: "NGC_6362", ra: 262.98, dec: -67.05, mag: 8.9, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 8.4 },
+  { id: "ngc6383", name: "NGC 6383 Open Cluster", wikiQuery: "NGC_6383", ra: 263.67, dec: -32.57, mag: 5.5, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 6.9 },
+  { id: "ngc6388", name: "NGC 6388 Globular Cluster", wikiQuery: "NGC_6388", ra: 264.07, dec: -44.74, mag: 6.9, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 8.4 },
+  { id: "ngc6441", name: "NGC 6441 Silver Nugget Cluster", wikiQuery: "NGC_6441", ra: 267.55, dec: -37.05, mag: 8.0, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 4.8 },
+  { id: "ngc6520", name: "NGC 6520 Open Cluster", wikiQuery: "NGC_6520", ra: 270.86, dec: -27.89, mag: 7.6, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 5.4 },
+  { id: "ngc6522", name: "NGC 6522 Globular Cluster", wikiQuery: "NGC_6522", ra: 270.89, dec: -30.03, mag: 9.5, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 3.9 },
+  { id: "ngc6530", name: "NGC 6530 Lagoon Cluster", wikiQuery: "NGC_6530", ra: 271.13, dec: -24.36, mag: 4.6, category: "Cluster", typeName: "Cluster with Nebulosity", sizeArcmin: 6.0 },
+  { id: "ngc6553", name: "NGC 6553 Globular Cluster", wikiQuery: "NGC_6553", ra: 272.32, dec: -25.91, mag: 8.1, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 5.4 },
+  { id: "ngc6604", name: "NGC 6604 Open Cluster", wikiQuery: "NGC_6604", ra: 274.51, dec: -12.24, mag: 6.5, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 9.6 },
+  { id: "ngc6624", name: "NGC 6624 Globular Cluster", wikiQuery: "NGC_6624", ra: 275.92, dec: -30.36, mag: 7.6, category: "Cluster", typeName: "Globular Cluster", sizeArcmin: 3.3 },
+  { id: "ngc6709", name: "NGC 6709 Open Cluster", wikiQuery: "NGC_6709", ra: 282.82, dec: 10.34, mag: 6.7, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 8.7 },
+  { id: "ngc6791", name: "NGC 6791 Open Cluster", wikiQuery: "NGC_6791", ra: 290.22, dec: 37.78, mag: 9.5, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 6.3 },
+  { id: "ngc6871", name: "NGC 6871 Open Cluster", wikiQuery: "NGC_6871", ra: 301.53, dec: 35.78, mag: 5.2, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 9.3 },
+  { id: "ngc6910", name: "NGC 6910 Open Cluster", wikiQuery: "NGC_6910", ra: 305.8, dec: 40.77, mag: 7.4, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 6.3 },
+  { id: "ngc6940", name: "NGC 6940 Open Cluster", wikiQuery: "NGC_6940", ra: 308.62, dec: 28.29, mag: 6.3, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 10.8 },
+  { id: "ngc7063", name: "NGC 7063 Open Cluster", wikiQuery: "NGC_7063", ra: 321.13, dec: 36.5, mag: 7.0, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 6.3 },
+  { id: "ngc7510", name: "NGC 7510 Open Cluster", wikiQuery: "NGC_7510", ra: 347.77, dec: 60.58, mag: 7.9, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 3.9 },
+  { id: "ngc7686", name: "NGC 7686 Open Cluster", wikiQuery: "NGC_7686", ra: 352.42, dec: 49.17, mag: 5.6, category: "Cluster", typeName: "Open Cluster", sizeArcmin: 3.6 }
 ];
 
 const RAD = Math.PI / 180;
 const DEG = 180 / Math.PI;
 let selectedTargetId = "m31";
+let selectedTelescopeId = "generic";
 const wikiCache = {};
 
 function norm(deg) { return (deg % 360 + 360) % 360; }
@@ -951,25 +1156,55 @@ async function fetchWikiData(wikiQuery) {
   }
 }
 
-const SENSOR_FOV_ARCMIN = 84;
+// Real published aperture/focal-length/FOV specs (approximate -- vendors
+// round differently and some figures are derived from sensor size rather
+// than quoted directly) for popular consumer "smart telescopes", used to
+// scale FOV coverage %, estimated stacking time, and filter guidance to
+// whichever one is selected below. "Generic" reproduces this app's
+// original fixed 84' FOV / f4 assumptions, so it's a no-op baseline.
+const TELESCOPES = [
+  { id: "generic", name: "Generic Smart Telescope", apertureMm: 50, focalLengthMm: 200, fovArcmin: 84, filterSupport: "interchangeable" },
+  { id: "seestar_s50", name: "ZWO Seestar S50", apertureMm: 50, focalLengthMm: 250, fovArcmin: 77, filterSupport: "builtin-switchable" },
+  { id: "seestar_s30", name: "ZWO Seestar S30", apertureMm: 30, focalLengthMm: 150, fovArcmin: 128, filterSupport: "builtin-switchable" },
+  { id: "vespera_ii", name: "Vaonis Vespera II", apertureMm: 50, focalLengthMm: 250, fovArcmin: 96, filterSupport: "interchangeable" },
+  { id: "dwarf3", name: "Dwarflab Dwarf 3 (Tele Lens)", apertureMm: 35, focalLengthMm: 150, fovArcmin: 176, filterSupport: "interchangeable" },
+  { id: "origin", name: "Celestron Origin", apertureMm: 152, focalLengthMm: 334, fovArcmin: 76, filterSupport: "interchangeable" },
+  { id: "equinox2", name: "Unistellar eQuinox 2", apertureMm: 114, focalLengthMm: 450, fovArcmin: 47, filterSupport: "fixed" },
+];
+const GENERIC_TELESCOPE_F_RATIO = TELESCOPES[0].focalLengthMm / TELESCOPES[0].apertureMm;
 
-function calcExposureMinutes(category, mag) {
-  if (category === "SolarSystem") return 0;
-  let base = category === "Cluster" ? 3 : (category === "Galaxy" ? 15 : 10);
-  return Math.min(60, Math.max(2, Math.round(base * Math.pow(1.35, Math.max(0, mag - 4)))));
+function getSelectedTelescope() {
+  return TELESCOPES.find(t => t.id === selectedTelescopeId) || TELESCOPES[0];
 }
 
-function calcExposure(category, mag) {
+function calcExposureMinutes(category, mag, telescope) {
+  if (category === "SolarSystem") return 0;
+  let base = category === "Cluster" ? 3 : (category === "Galaxy" ? 15 : 10);
+  // Exposure time for extended deep-sky objects tracks focal ratio squared
+  // (surface brightness per pixel is ~independent of aperture at a fixed
+  // f-ratio) -- a faster scope than the f4 baseline needs less time, a
+  // slower one needs more.
+  const fRatio = telescope.focalLengthMm / telescope.apertureMm;
+  const speedFactor = Math.pow(fRatio / GENERIC_TELESCOPE_F_RATIO, 2);
+  return Math.min(60, Math.max(2, Math.round(base * speedFactor * Math.pow(1.35, Math.max(0, mag - 4)))));
+}
+
+function calcExposure(category, mag, telescope) {
   if (category === "SolarSystem") return "Instant / Solar Filter";
-  const mins = calcExposureMinutes(category, mag);
+  const mins = calcExposureMinutes(category, mag, telescope);
   return mins < 60 ? `${mins} mins` : "1 hr+";
 }
 
-function calcFovCoverage(sizeArcmin) {
-  return Math.round((sizeArcmin / SENSOR_FOV_ARCMIN) * 100);
+function calcFovCoverage(sizeArcmin, telescope) {
+  return Math.round((sizeArcmin / telescope.fovArcmin) * 100);
 }
 
-function calcFilterRecommendation(obj) {
+function calcFilterRecommendation(obj, telescope) {
+  if (telescope.filterSupport === "fixed") {
+    // e.g. Unistellar's fixed-optics design has no filter wheel/drawer at all.
+    return { label: "Not Supported (Fixed Optics)", cls: "badge-broadband", icon: "🔒" };
+  }
+  const builtin = telescope.filterSupport === "builtin-switchable";
   if (obj.category === "SolarSystem") {
     return { label: "Broadband / No Filter", cls: "badge-broadband", icon: "🌈" };
   }
@@ -979,15 +1214,21 @@ function calcFilterRecommendation(obj) {
     // strongly in Hydrogen-alpha / OIII, so a dual-band filter cuts light
     // pollution while passing most of the object's own light through.
     if (t.includes("emission") || t.includes("planetary") || t.includes("supernova")) {
-      return { label: "Dual-Band (Ha/OIII)", cls: "badge-dualband", icon: "🎯" };
+      return builtin
+        ? { label: "Enable Built-in Dual-Band", cls: "badge-dualband", icon: "🎯" }
+        : { label: "Dual-Band (Ha/OIII)", cls: "badge-dualband", icon: "🎯" };
     }
     // Pure reflection/dark nebulae are broadband continuum sources: a
     // narrowband filter would block most of their (and the field's) light.
-    return { label: "Broadband / No Filter", cls: "badge-broadband", icon: "🌈" };
+    return builtin
+      ? { label: "Disable Filter / Broadband", cls: "badge-broadband", icon: "🌈" }
+      : { label: "Broadband / No Filter", cls: "badge-broadband", icon: "🌈" };
   }
   // Galaxies, clusters, and reference stars are broadband continuum
   // sources - a dual-band filter would starve them of most of their light.
-  return { label: "Broadband / No Filter", cls: "badge-broadband", icon: "🌈" };
+  return builtin
+    ? { label: "Disable Filter / Broadband", cls: "badge-broadband", icon: "🌈" }
+    : { label: "Broadband / No Filter", cls: "badge-broadband", icon: "🌈" };
 }
 
 function getAzDiff(targetAz, centerAz) {
@@ -1259,14 +1500,15 @@ async function renderFraming(obj, pos) {
     wikiSummary.innerHTML = "";
   }
 
-  const fitPercentage = calcFovCoverage(obj.sizeArcmin);
-  const filterRec = calcFilterRecommendation(obj);
+  const telescope = getSelectedTelescope();
+  const fitPercentage = calcFovCoverage(obj.sizeArcmin, telescope);
+  const filterRec = calcFilterRecommendation(obj, telescope);
   document.getElementById('fovMetrics').innerHTML = `
     <strong>Type:</strong> ${obj.typeName}<br>
     <strong>Apparent Size:</strong> ${obj.sizeArcmin}' arcmin<br>
-    <strong>FOV Coverage:</strong> ~${fitPercentage}% of Sensor Field<br>
+    <strong>FOV Coverage:</strong> ~${fitPercentage}% of Sensor Field (${telescope.name})<br>
     <strong>Altitude:</strong> ${pos.alt.toFixed(1)}° | <strong>Azimuth:</strong> ${pos.az.toFixed(1)}°<br>
-    <strong>Est. Stack Time:</strong> ${calcExposure(obj.category, obj.mag)}<br>
+    <strong>Est. Stack Time:</strong> ${calcExposure(obj.category, obj.mag, telescope)}<br>
     <strong>Recommended Filter:</strong> ${filterRec.icon} ${filterRec.label}
   `;
 }
@@ -1439,20 +1681,21 @@ function render() {
     }
   });
 
+  const telescope = getSelectedTelescope();
   const sortBy = document.getElementById('sortBy').value;
   visibleObjectsList.sort((a, b) => {
     switch (sortBy) {
-      case 'fov_desc': return calcFovCoverage(b.obj.sizeArcmin) - calcFovCoverage(a.obj.sizeArcmin);
-      case 'fov_asc': return calcFovCoverage(a.obj.sizeArcmin) - calcFovCoverage(b.obj.sizeArcmin);
-      case 'time_asc': return calcExposureMinutes(a.obj.category, a.obj.mag) - calcExposureMinutes(b.obj.category, b.obj.mag);
-      case 'time_desc': return calcExposureMinutes(b.obj.category, b.obj.mag) - calcExposureMinutes(a.obj.category, a.obj.mag);
+      case 'fov_desc': return calcFovCoverage(b.obj.sizeArcmin, telescope) - calcFovCoverage(a.obj.sizeArcmin, telescope);
+      case 'fov_asc': return calcFovCoverage(a.obj.sizeArcmin, telescope) - calcFovCoverage(b.obj.sizeArcmin, telescope);
+      case 'time_asc': return calcExposureMinutes(a.obj.category, a.obj.mag, telescope) - calcExposureMinutes(b.obj.category, b.obj.mag, telescope);
+      case 'time_desc': return calcExposureMinutes(b.obj.category, b.obj.mag, telescope) - calcExposureMinutes(a.obj.category, a.obj.mag, telescope);
       default: return 0;
     }
   });
 
   visibleObjectsList.forEach(({ obj, pos, inWindow }) => {
     const isSelected = obj.id === selectedTargetId;
-    const filterRec = calcFilterRecommendation(obj);
+    const filterRec = calcFilterRecommendation(obj, telescope);
     const card = document.createElement('div');
     card.className = `card ${obj.category.toLowerCase()} ${isSelected ? 'selected' : ''}`;
     card.innerHTML = `
@@ -1460,8 +1703,8 @@ function render() {
       <div class="card-info">
         <strong>${obj.name}</strong><br>
         Mag: ${obj.mag} | Alt: ${pos.alt.toFixed(1)}°<br>
-        <span class="badge">⏱ ${calcExposure(obj.category, obj.mag)}</span>
-        <span class="badge" style="margin-left: 4px;">🔭 ${calcFovCoverage(obj.sizeArcmin)}% FOV</span>
+        <span class="badge">⏱ ${calcExposure(obj.category, obj.mag, telescope)}</span>
+        <span class="badge" style="margin-left: 4px;">🔭 ${calcFovCoverage(obj.sizeArcmin, telescope)}% FOV</span>
         <span class="badge ${filterRec.cls}" style="margin-left: 4px;">${filterRec.icon} ${filterRec.label}</span>
         ${!inWindow ? `<span class="badge" style="margin-left: 4px; background: rgba(255,183,3,0.18); color: #ffb703;">⟲ Not in view</span>` : ''}
       </div>
@@ -1620,6 +1863,14 @@ document.getElementById('btnReset').addEventListener('click', () => {
   document.getElementById(id).addEventListener('change', render);
 });
 
+const telescopeSelect = document.getElementById('telescopeSelect');
+telescopeSelect.innerHTML = TELESCOPES.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+telescopeSelect.value = selectedTelescopeId;
+telescopeSelect.addEventListener('change', () => {
+  selectedTelescopeId = telescopeSelect.value;
+  render();
+});
+
 document.getElementById('btnGps').addEventListener('click', () => {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(p => {
@@ -1643,6 +1894,12 @@ new ResizeObserver(() => {
     render();
   });
 }).observe(document.getElementById('sky'));
+
+// Keep the search placeholder's target count honest as the catalog grows,
+// rounded down to a clean "N+" so it never overstates what's actually there.
+const totalTargetCount = CATALOG_DSO.length + getSolarSystemObjects(new Date()).length;
+document.getElementById('txtSearch').placeholder =
+  `Search ${Math.floor(totalTargetCount / 25) * 25}+ targets (M, NGC, IC, Planets)...`;
 
 // Load constellation data independently so a network failure never affects
 // the existing DSO application.
