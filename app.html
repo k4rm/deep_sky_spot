@@ -1102,6 +1102,7 @@ const CATALOG_DSO = [
 const RAD = Math.PI / 180;
 const DEG = 180 / Math.PI;
 let selectedTargetId = "m31";
+let urlDeepLinkTargetId = null;
 let selectedTelescopeId = "generic";
 const wikiCache = {};
 
@@ -1160,10 +1161,10 @@ async function fetchWikiData(wikiQuery) {
 // round differently and some figures are derived from sensor size rather
 // than quoted directly) for popular consumer "smart telescopes", used to
 // scale FOV coverage %, estimated stacking time, and filter guidance to
-// whichever one is selected below. "Generic" reproduces this app's
+// whichever one is selected below. "Dwarf Mini" reproduces this app's
 // original fixed 84' FOV / f4 assumptions, so it's a no-op baseline.
 const TELESCOPES = [
-  { id: "generic", name: "Generic Smart Telescope", apertureMm: 50, focalLengthMm: 200, fovArcmin: 84, filterSupport: "interchangeable" },
+  { id: "generic", name: "Dwarf Mini (or generic smart telescope)", apertureMm: 50, focalLengthMm: 200, fovArcmin: 84, filterSupport: "interchangeable" },
   { id: "seestar_s50", name: "ZWO Seestar S50", apertureMm: 50, focalLengthMm: 250, fovArcmin: 77, filterSupport: "builtin-switchable" },
   { id: "seestar_s30", name: "ZWO Seestar S30", apertureMm: 30, focalLengthMm: 150, fovArcmin: 128, filterSupport: "builtin-switchable" },
   { id: "vespera_ii", name: "Vaonis Vespera II", apertureMm: 50, focalLengthMm: 250, fovArcmin: 96, filterSupport: "interchangeable" },
@@ -1290,11 +1291,13 @@ function applyDsoFromUrl() {
   if (!match) return;
 
   selectedTargetId = match.id;
+  urlDeepLinkTargetId = match.id;
 
   const lat = parseFloat(document.getElementById('lat').value) || 0;
   const lng = parseFloat(document.getElementById('lng').value) || 0;
   const pos = raDecToAltAz(match.ra, match.dec, lat, lng, new Date());
   document.getElementById('azimuth').value = Math.round(norm(pos.az));
+  render();
 }
 
 // ---------------------------------------------------------------------------
@@ -1533,6 +1536,7 @@ function render() {
   const minAlt = parseFloat(document.getElementById('minAlt').value) || 20;
   const searchText = (document.getElementById('txtSearch').value || "").toLowerCase().trim();
   const globalSearch = document.getElementById('chkGlobalSearch').checked && searchText !== "";
+  const urlDeepLinkActive = urlDeepLinkTargetId !== null && selectedTargetId === urlDeepLinkTargetId;
 
   const showSolar = document.getElementById('chkSolar').checked;
   const showGalaxies = document.getElementById('chkGalaxy').checked;
@@ -1595,6 +1599,7 @@ function render() {
     const isSelected = obj.id === selectedTargetId;
     const matchesSearch = searchText === "" || obj.name.toLowerCase().includes(searchText) || obj.typeName.toLowerCase().includes(searchText);
     const searchActive = searchText !== "";
+    const isDeepLinkTarget = obj.id === urlDeepLinkTargetId;
 
     if (isSelected) {
       selectedObjObj = obj;
@@ -1624,12 +1629,16 @@ function render() {
         // never fade an actual match, even one that's normally in the
         // faint bucket, so it stays fully visible.
         if (!matchesSearch && !isSelected) group.setAttribute("opacity", "0.12");
+      } else if (urlDeepLinkActive) {
+        // While viewing a deep-link target, highlight it and fade out others
+        if (!isDeepLinkTarget && !isSelected) group.setAttribute("opacity", "0.12");
       } else if (isFaint && !isSelected) {
         group.setAttribute("opacity", "0.4");
       }
       group.addEventListener('click', (e) => {
         e.stopPropagation();
         selectedTargetId = obj.id;
+        urlDeepLinkTargetId = null;
         openRightPanelOnMobile();
         render();
       });
@@ -1648,6 +1657,13 @@ function render() {
         searchRing.setAttribute("fill", "none"); searchRing.setAttribute("stroke", "#ffe066");
         searchRing.setAttribute("stroke-width", "2");
         group.appendChild(searchRing);
+      } else if (urlDeepLinkActive && isDeepLinkTarget) {
+        // Highlight the deep-link target with a red ring
+        const deepLinkRing = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        deepLinkRing.setAttribute("cx", 0); deepLinkRing.setAttribute("cy", 0); deepLinkRing.setAttribute("r", "11");
+        deepLinkRing.setAttribute("fill", "none"); deepLinkRing.setAttribute("stroke", "#ff0055");
+        deepLinkRing.setAttribute("stroke-width", "2");
+        group.appendChild(deepLinkRing);
       }
 
       const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
@@ -1660,7 +1676,8 @@ function render() {
 
       const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
       text.setAttribute("x", 10); text.setAttribute("y", 4);
-      text.setAttribute("fill", isSelected ? "#ff0055" : isSearchMatch ? "#ffe066" : (isVisible ? "#ffffff" : "#777777"));
+      const isDeepLinkHighlight = urlDeepLinkActive && isDeepLinkTarget && !isSelected;
+      text.setAttribute("fill", isSelected ? "#ff0055" : isSearchMatch ? "#ffe066" : isDeepLinkHighlight ? "#ff0055" : (isVisible ? "#ffffff" : "#777777"));
       text.textContent = `${obj.name} (${pos.alt.toFixed(1)}°)`;
       group.appendChild(text);
 
@@ -1920,6 +1937,10 @@ document.getElementById('sky').addEventListener('click', (e) => {
   const searchInput = document.getElementById('txtSearch');
   if (searchInput.value.trim()) {
     searchInput.value = '';
+    urlDeepLinkTargetId = null;
+    render();
+  } else if (urlDeepLinkTargetId) {
+    urlDeepLinkTargetId = null;
     render();
   }
 });
