@@ -1256,6 +1256,34 @@ function raDecToAltAz(raDeg, decDeg, latDeg, lngDeg, now) {
   return { alt: alt / RAD, az: (az / RAD + 360) % 360 };
 }
 
+const TRAJECTORY_HOURS = 4;
+const TRAJECTORY_STEP_MINUTES = 5;
+
+// Path of the selected target across the sky map for the next
+// TRAJECTORY_HOURS, as points in the sky SVG's 800x500 viewBox space (same
+// projection as a target dot: x from azimuth offset off centerAz, y from
+// altitude). Azimuth is unwrapped continuously from one sample to the next
+// (smallest-step adjustment) rather than re-wrapped to +/-180 of centerAz at
+// each sample, so the path stays smooth through az/alt singularities like a
+// near-zenith transit, where raw azimuth can swing 100+ degrees in an hour.
+function computeTrajectoryPoints(obj, lat, lng, now, centerAz, fov) {
+  const points = [];
+  const steps = Math.round((TRAJECTORY_HOURS * 60) / TRAJECTORY_STEP_MINUTES);
+  let unwrappedAz = null;
+  for (let i = 0; i <= steps; i++) {
+    const t = new Date(now.getTime() + i * TRAJECTORY_STEP_MINUTES * 60000);
+    const pos = raDecToAltAz(obj.ra, obj.dec, lat, lng, t);
+    unwrappedAz = unwrappedAz === null
+      ? centerAz + getAzDiff(pos.az, centerAz)
+      : unwrappedAz + getAzDiff(pos.az, unwrappedAz);
+    points.push({
+      x: 400 + ((unwrappedAz - centerAz) / (fov / 2)) * 400,
+      y: 500 * (1 - (pos.alt / 90)),
+    });
+  }
+  return points;
+}
+
 // ---------------------------------------------------------------------------
 // Direct-link DSO lookup: appending a target to the app URL (as a hash, e.g.
 // app.html#m31, a bare query app.html?venus, or a ?dso=/?target=/?t= query
@@ -1655,42 +1683,26 @@ function render() {
         ring.setAttribute("stroke-width", "2"); ring.setAttribute("stroke-dasharray", "3 2");
         group.appendChild(ring);
 
-        // Direction-of-motion arrow: which way the target is currently
-        // heading. This uses a short lookahead (the instantaneous tangent),
-        // not the literal position 4 hours from now -- azimuth is singular
-        // at the zenith, so any target that transits near-overhead (dec
-        // close to the observer's latitude) sweeps through a huge, wrapped
-        // azimuth swing within a 4-hour window (e.g. 83deg -> 184deg -> 277deg),
-        // which made a straight "now to +4h" vector point backwards relative
-        // to where the target is actually heading right now. Drawn as a
-        // fixed-length vector rather than at the actual future screen
-        // position, since that position may fall well outside the current
-        // az/alt window (the view doesn't track the sky).
-        const futurePos = raDecToAltAz(obj.ra, obj.dec, lat, lng, new Date(now.getTime() + 15 * 60 * 1000));
-        const futureAzDiff = getAzDiff(futurePos.az, centerAz);
-        const futureX = 400 + (futureAzDiff / (fov / 2)) * 400;
-        const futureY = 500 * (1 - (futurePos.alt / 90));
-        // This group's local subspace maps 1:1 to real screen pixels (see
-        // comment above), so convert the viewBox-space delta to screen
-        // pixels the same way the outer SVG's independent x/y stretch does.
-        let arrowDx = (futureX - x) * skyScaleX;
-        let arrowDy = (futureY - y) * skyScaleY;
-        const arrowLen = Math.hypot(arrowDx, arrowDy);
-        if (arrowLen > 0.001) {
-          const ARROW_LENGTH = 34;
-          const ARROW_START_OFFSET = 17; // clear of the selection ring
-          arrowDx = (arrowDx / arrowLen) * ARROW_LENGTH;
-          arrowDy = (arrowDy / arrowLen) * ARROW_LENGTH;
-          const startX = (arrowDx / ARROW_LENGTH) * ARROW_START_OFFSET;
-          const startY = (arrowDy / ARROW_LENGTH) * ARROW_START_OFFSET;
-
-          const arrow = document.createElementNS("http://www.w3.org/2000/svg", "line");
-          arrow.setAttribute("x1", startX); arrow.setAttribute("y1", startY);
-          arrow.setAttribute("x2", startX + arrowDx); arrow.setAttribute("y2", startY + arrowDy);
-          arrow.setAttribute("stroke", "#ffe066");
-          arrow.setAttribute("stroke-width", "2");
-          arrow.setAttribute("marker-end", "url(#motionArrowHead)");
-          group.appendChild(arrow);
+        // Full path across the sky for the next TRAJECTORY_HOURS, with an
+        // arrowhead at the far end showing which way it's heading. Drawn in
+        // the outer 800x500 viewBox space (not this group's counter-scaled
+        // local subspace), i.e. the same coordinate space as the dot itself,
+        // so it traces the target's true track across the window rather
+        // than a constant-pixel-size decoration.
+        const trajectory = computeTrajectoryPoints(obj, lat, lng, now, centerAz, fov);
+        if (trajectory.length > 1) {
+          const pointsAttr = trajectory.map(p => `${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(' ');
+          const path = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+          path.setAttribute("points", pointsAttr);
+          path.setAttribute("fill", "none");
+          path.setAttribute("stroke", "#ffe066");
+          path.setAttribute("stroke-width", "1.5");
+          path.setAttribute("stroke-opacity", "0.7");
+          path.setAttribute("stroke-dasharray", "5 4");
+          path.setAttribute("marker-end", "url(#motionArrowHead)");
+          // Drawn on targetsGroup (not `group`) so it sits behind every
+          // target's dot/ring/label, appended before `group` below.
+          targetsGroup.appendChild(path);
         }
       } else if (searchActive && matchesSearch) {
         // Highlight every search match with a bright ring so it pops out
