@@ -1655,11 +1655,18 @@ function render() {
         ring.setAttribute("stroke-width", "2"); ring.setAttribute("stroke-dasharray", "3 2");
         group.appendChild(ring);
 
-        // Direction-of-motion arrow: where the target is headed over the
-        // next 4 hours. Drawn as a fixed-length vector rather than at the
-        // actual future screen position, since that position may fall well
-        // outside the current az/alt window (the view doesn't track the sky).
-        const futurePos = raDecToAltAz(obj.ra, obj.dec, lat, lng, new Date(now.getTime() + 4 * 3600 * 1000));
+        // Direction-of-motion arrow: which way the target is currently
+        // heading. This uses a short lookahead (the instantaneous tangent),
+        // not the literal position 4 hours from now -- azimuth is singular
+        // at the zenith, so any target that transits near-overhead (dec
+        // close to the observer's latitude) sweeps through a huge, wrapped
+        // azimuth swing within a 4-hour window (e.g. 83deg -> 184deg -> 277deg),
+        // which made a straight "now to +4h" vector point backwards relative
+        // to where the target is actually heading right now. Drawn as a
+        // fixed-length vector rather than at the actual future screen
+        // position, since that position may fall well outside the current
+        // az/alt window (the view doesn't track the sky).
+        const futurePos = raDecToAltAz(obj.ra, obj.dec, lat, lng, new Date(now.getTime() + 15 * 60 * 1000));
         const futureAzDiff = getAzDiff(futurePos.az, centerAz);
         const futureX = 400 + (futureAzDiff / (fov / 2)) * 400;
         const futureY = 500 * (1 - (futurePos.alt / 90));
